@@ -35,7 +35,7 @@ function PaymentsPage() {
     return map;
   }, [payments]);
 
-  const totalRecebido = payments.reduce((s, p) => s + Number(p.valor_pago), 0);
+  const totalRecebido = payments.reduce((s, p) => s + Number(p.valor_pt ?? p.valor_pago), 0);
   const emFalta = ativos.filter((c) => !byClient[c.id]);
   const totalFalta = emFalta.reduce((s, c) => s + valorAPagar(c), 0);
 
@@ -131,7 +131,7 @@ function PaymentsPage() {
                     {p.notas && ` · ${p.notas}`}
                   </p>
                 </div>
-                <Badge variant="outline" className="font-mono text-xs">{fmtEUR(Number(p.valor_pago))}</Badge>
+                <Badge variant="outline" className="font-mono text-xs">{fmtEUR(Number(p.valor_pt ?? p.valor_pago))}</Badge>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   onClick={() => handleDelete(p.id)}>
                   <Trash2 className="w-3.5 h-3.5" />

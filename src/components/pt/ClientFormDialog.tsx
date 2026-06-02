@@ -292,6 +292,29 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
               </Field>
 
               <div className="rounded-xl bg-muted/50 p-3 space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Treinos
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Saldo: <span className="font-mono font-semibold text-foreground">
+                      {Math.max(0, Math.trunc(num(form.treinos_pagos)) - Math.trunc(num(form.treinos_dados)))}
+                    </span>
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Treinos pagos">
+                    <Input type="number" inputMode="numeric" min={0} step={1}
+                      value={form.treinos_pagos} onChange={(e) => set("treinos_pagos", e.target.value)} />
+                  </Field>
+                  <Field label="Treinos dados">
+                    <Input type="number" inputMode="numeric" min={0} step={1}
+                      value={form.treinos_dados} onChange={(e) => set("treinos_dados", e.target.value)} />
+                  </Field>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-muted/50 p-3 space-y-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Previsão próximo mês
                 </p>

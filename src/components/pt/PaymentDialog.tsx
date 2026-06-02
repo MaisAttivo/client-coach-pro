@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -10,9 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import {
-  type PtClient, valorRealPT, valorAPagar, fmtEUR,
-} from "@/lib/pt-clients";
+import { type PtClient, fmtEUR } from "@/lib/pt-clients";
 import { createPayment, mesRef } from "@/lib/pt-payments";
 
 interface Props {
@@ -21,55 +19,61 @@ interface Props {
   clients: PtClient[];
   defaultMonth: string;
   defaultClientId?: string | null;
-  onSaved: () => void;
+  onSaved: (client: PtClient) => void;
 }
 
 export function PaymentDialog({ open, onOpenChange, clients, defaultMonth, defaultClientId, onSaved }: Props) {
   const [clientId, setClientId] = useState<string>(defaultClientId ?? "");
   const [mes, setMes] = useState(defaultMonth);
-  const [data, setData] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  });
+  const [data, setData] = useState(() => new Date().toISOString().slice(0, 10));
   const [valor, setValor] = useState("");
   const [notas, setNotas] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const client = clients.find((c) => c.id === clientId);
+
+  // valor pré-preenchido com valor acordado, atualiza se mudar de cliente
   useEffect(() => {
     if (open) {
       setClientId(defaultClientId ?? clients[0]?.id ?? "");
       setMes(defaultMonth);
       setData(new Date().toISOString().slice(0, 10));
-      setValor("");
       setNotas("");
     }
   }, [open, defaultClientId, defaultMonth, clients]);
 
-  const client = clients.find((c) => c.id === clientId);
-  const realPT = client ? valorRealPT(client) : 0;
-  const aPagar = client ? valorAPagar(client) : 0;
-
   useEffect(() => {
-    if (client && !valor) setValor(String(aPagar || ""));
+    if (client) setValor(String(Number(client.valor_acordado ?? 0) || ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
+  // Decomposição dinâmica baseada no valor inserido
+  const breakdown = useMemo(() => {
+    const pago = Number(valor.replace(",", ".")) || 0;
+    const ginasio = client ? Number(client.valor_ginasio_por_treino ?? 0) : 0;
+    const online = client ? Number(client.valor_acompanhamento_online ?? 0) : 0;
+    const desconto = client ? Number(client.desconto_afiliado ?? 0) : 0;
+    // O cliente paga "pago"; desse valor descontam-se ginásio e online
+    // (o desconto afiliado já está refletido no valor pago).
+    const realPT = Math.max(0, pago - ginasio - online);
+    return { pago, ginasio, online, desconto, realPT };
+  }, [valor, client]);
+
   const handleSave = async () => {
     if (!client) { toast.error("Escolhe um cliente"); return; }
-    const valorPago = Number(valor.replace(",", ".")) || 0;
-    if (valorPago <= 0) { toast.error("Indica o valor pago"); return; }
+    if (breakdown.pago <= 0) { toast.error("Indica o valor pago"); return; }
     setSaving(true);
     try {
       await createPayment({
         client_id: client.id,
         data,
         mes_referencia: mes || mesRef(new Date()),
-        valor_pago: valorPago,
-        valor_pt: realPT,
+        valor_pago: breakdown.pago,
+        valor_pt: breakdown.realPT,
         notas: notas.trim() || null,
       });
       toast.success("Pagamento registado");
-      onSaved();
+      onSaved(client);
       onOpenChange(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro");
@@ -107,37 +111,34 @@ export function PaymentDialog({ open, onOpenChange, clients, defaultMonth, defau
             </div>
           </div>
 
-          {client && (
-            <div className="rounded-xl bg-muted/50 p-3 space-y-1 text-xs">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-                Decomposição
-              </p>
-              <Row label="Valor acordado" value={fmtEUR(Number(client.valor_acordado))} />
-              {Number(client.valor_ginasio_por_treino) > 0 && (
-                <Row label="− Ginásio (mensal)"
-                  value={`−${fmtEUR(Number(client.valor_ginasio_por_treino))}`} />
-              )}
-
-              {Number(client.valor_acompanhamento_online) > 0 && (
-                <Row label="− Acompanhamento online" value={`−${fmtEUR(Number(client.valor_acompanhamento_online))}`} />
-              )}
-              <div className="pt-1.5 mt-1 border-t border-border/60">
-                <Row label="Valor real PT" value={fmtEUR(realPT)} />
-              </div>
-              {Number(client.desconto_afiliado) > 0 && (
-                <Row label="− Desconto afiliado" value={`−${fmtEUR(Number(client.desconto_afiliado))}`} />
-              )}
-              <div className="pt-1.5 mt-1 border-t border-border/60">
-                <Row label="A pagar" value={fmtEUR(aPagar)} accent />
-              </div>
-            </div>
-          )}
-
           <div className="space-y-1.5">
             <Label className="text-xs">Valor pago (€)</Label>
             <Input type="number" inputMode="decimal" step="0.01"
               value={valor} onChange={(e) => setValor(e.target.value)} />
           </div>
+
+          {client && (
+            <div className="rounded-xl bg-muted/50 p-3 space-y-1 text-xs">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                Decomposição
+              </p>
+              <Row label="Valor pago" value={fmtEUR(breakdown.pago)} />
+              {breakdown.ginasio > 0 && (
+                <Row label="− Ginásio (mensal)" value={`−${fmtEUR(breakdown.ginasio)}`} />
+              )}
+              {breakdown.online > 0 && (
+                <Row label="− Acompanhamento online" value={`−${fmtEUR(breakdown.online)}`} />
+              )}
+              <div className="pt-1.5 mt-1 border-t border-border/60">
+                <Row label="Valor real PT" value={fmtEUR(breakdown.realPT)} accent />
+              </div>
+              {breakdown.desconto > 0 && (
+                <p className="pt-1 text-[11px] text-muted-foreground">
+                  Desconto afiliado de {fmtEUR(breakdown.desconto)} aplicado no valor combinado.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <Label className="text-xs">Notas</Label>

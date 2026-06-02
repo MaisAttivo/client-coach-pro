@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import {
   listPaymentsByMonth, deletePayment, mesRef, mesRefLabel, shiftMes,
 } from "@/lib/pt-payments";
 import { PaymentDialog } from "@/components/pt/PaymentDialog";
+import { AddTrainingsDialog } from "@/components/pt/AddTrainingsDialog";
+import type { PtClient } from "@/lib/pt-clients";
 
 export const Route = createFileRoute("/_authenticated/pt/payments")({
   head: () => ({ meta: [{ title: "Pagamentos · PT" }] }),
@@ -21,6 +23,10 @@ function PaymentsPage() {
   const [mes, setMes] = useState(() => mesRef(new Date()));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [preselectClient, setPreselectClient] = useState<string | null>(null);
+  const [trainingsDialogOpen, setTrainingsDialogOpen] = useState(false);
+  const [trainingsClient, setTrainingsClient] = useState<PtClient | null>(null);
+  const qc = useQueryClient();
+
 
   const { data: clients = [] } = useQuery({ queryKey: ["pt_clients"], queryFn: listClients });
   const { data: payments = [], refetch, isLoading } = useQuery({
@@ -148,7 +154,18 @@ function PaymentsPage() {
         clients={ativos}
         defaultMonth={mes}
         defaultClientId={preselectClient}
-        onSaved={() => refetch()}
+        onSaved={(c) => {
+          refetch();
+          setTrainingsClient(c);
+          setTrainingsDialogOpen(true);
+        }}
+      />
+
+      <AddTrainingsDialog
+        open={trainingsDialogOpen}
+        onOpenChange={setTrainingsDialogOpen}
+        client={trainingsClient}
+        onDone={() => qc.invalidateQueries({ queryKey: ["pt_clients"] })}
       />
     </main>
   );

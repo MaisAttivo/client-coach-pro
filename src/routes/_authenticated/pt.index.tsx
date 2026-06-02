@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import {
-  TrendingUp, TrendingDown, Users, CreditCard, Package, Gift, AlertTriangle, Dumbbell, CheckCircle2,
+  TrendingUp, TrendingDown, Users, CreditCard, Package, Gift, AlertTriangle, Dumbbell, CheckCircle2, Pencil,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { ForecastDialog } from "@/components/pt/ForecastDialog";
 import {
   listClients,
   type PtClient,

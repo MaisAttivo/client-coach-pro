@@ -1,63 +1,57 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, TrendingDown, TrendingUp, Minus } from "lucide-react";
-import { type PtClient, SERVICE_LABEL } from "@/lib/pt-clients";
+import { Phone, TrendingDown, Gift } from "lucide-react";
+import { type PtClient, SERVICE_LABEL, FREQUENCY_LABEL, fmtEUR } from "@/lib/pt-clients";
 
 interface Props {
   client: PtClient;
   onClick: () => void;
 }
 
-const fmt = (n: number) => `${n.toFixed(2)}€`;
-
 export function ClientCard({ client: c, onClick }: Props) {
-  const restantes = c.treinos_pagos - c.treinos_dados;
-  const forecastIcon =
-    c.forecast === "continuar" ? <TrendingUp className="w-3 h-3" />
-    : c.forecast === "parar" ? <TrendingDown className="w-3 h-3" />
-    : <Minus className="w-3 h-3" />;
-  const forecastVariant =
-    c.forecast === "parar" ? "destructive"
-    : c.forecast === "continuar" ? "default"
-    : "secondary";
+  const vaiParar = c.status === "ativo" && c.forecast === "parar";
+  const temDesconto = Number(c.desconto_afiliado ?? 0) > 0;
 
   return (
     <button onClick={onClick} className="text-left w-full">
-      <Card className="p-4 bg-surface hover:bg-surface-elevated border-border transition-colors active:scale-[0.99]">
-        <div className="flex items-start gap-3">
-          <div className="shrink-0 w-10 h-10 rounded-full bg-primary/15 text-primary flex items-center justify-center font-mono text-sm font-semibold">
-            {c.numero}
-          </div>
+      <Card className={`p-4 bg-surface hover:bg-surface-elevated transition-all active:scale-[0.99] ${vaiParar ? "border-destructive/40" : "border-border"}`}>
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="font-medium text-foreground truncate">{c.nome}</p>
-              {!c.ativo && <Badge variant="outline" className="text-[10px]">Inativo</Badge>}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold text-foreground text-base">{c.nome}</h3>
+              {vaiParar && (
+                <Badge variant="destructive" className="text-[10px] gap-1 px-1.5 py-0">
+                  <TrendingDown className="w-2.5 h-2.5" /> Vai parar
+                </Badge>
+              )}
             </div>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+            {c.telefone && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                <Phone className="w-3 h-3" /> {c.telefone}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
               <Badge variant="outline" className="text-[10px] font-normal">
                 {SERVICE_LABEL[c.service_type]}
               </Badge>
+              {c.frequencia_semanal > 0 && (
+                <Badge variant="outline" className="text-[10px] font-normal">
+                  {FREQUENCY_LABEL[c.frequencia_semanal] ?? `${c.frequencia_semanal}x/semana`}
+                </Badge>
+              )}
               <Badge variant="outline" className="text-[10px] font-mono font-normal">
-                {fmt(Number(c.valor_acordado))}
+                {fmtEUR(Number(c.valor_acordado))}
               </Badge>
-              <Badge variant={forecastVariant} className="text-[10px] font-normal gap-1">
-                {forecastIcon}
-                {c.forecast === "continuar" ? "Continua" : c.forecast === "parar" ? "Vai parar" : "?"}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-              <span>
-                Treinos:{" "}
-                <span className={`font-mono font-semibold ${restantes <= 0 ? "text-destructive" : restantes <= 2 ? "text-warning" : "text-foreground"}`}>
-                  {restantes}
-                </span>{" "}
-                / {c.treinos_pagos}
-              </span>
-              <span className="text-muted-foreground/60">·</span>
-              <span className="font-mono">Eu {fmt(Number(c.valor_recebido))}</span>
+              {temDesconto && (
+                <Badge className="text-[10px] font-normal gap-1 bg-accent text-accent-foreground border-0">
+                  <Gift className="w-2.5 h-2.5" /> −{fmtEUR(Number(c.desconto_afiliado))}
+                </Badge>
+              )}
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+          <div className="text-right shrink-0">
+            <div className="font-mono text-2xl font-semibold leading-none">#{c.numero}</div>
+          </div>
         </div>
       </Card>
     </button>

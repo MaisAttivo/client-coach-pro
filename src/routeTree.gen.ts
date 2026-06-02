@@ -12,6 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedPtRouteImport } from './routes/_authenticated/pt'
+import { Route as AuthenticatedPtIndexRouteImport } from './routes/_authenticated/pt.index'
+import { Route as AuthenticatedPtTrainingsRouteImport } from './routes/_authenticated/pt.trainings'
+import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
 import { Route as AuthenticatedPtClientsRouteImport } from './routes/_authenticated/pt.clients'
 
 const LoginRoute = LoginRouteImport.update({
@@ -28,40 +32,83 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPtClientsRoute = AuthenticatedPtClientsRouteImport.update({
-  id: '/pt/clients',
-  path: '/pt/clients',
+const AuthenticatedPtRoute = AuthenticatedPtRouteImport.update({
+  id: '/pt',
+  path: '/pt',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPtIndexRoute = AuthenticatedPtIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedPtRoute,
+} as any)
+const AuthenticatedPtTrainingsRoute =
+  AuthenticatedPtTrainingsRouteImport.update({
+    id: '/trainings',
+    path: '/trainings',
+    getParentRoute: () => AuthenticatedPtRoute,
+  } as any)
+const AuthenticatedPtPaymentsRoute = AuthenticatedPtPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AuthenticatedPtRoute,
+} as any)
+const AuthenticatedPtClientsRoute = AuthenticatedPtClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AuthenticatedPtRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/pt': typeof AuthenticatedPtRouteWithChildren
   '/pt/clients': typeof AuthenticatedPtClientsRoute
+  '/pt/payments': typeof AuthenticatedPtPaymentsRoute
+  '/pt/trainings': typeof AuthenticatedPtTrainingsRoute
+  '/pt/': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof AuthenticatedIndexRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
+  '/pt/payments': typeof AuthenticatedPtPaymentsRoute
+  '/pt/trainings': typeof AuthenticatedPtTrainingsRoute
+  '/pt': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/pt': typeof AuthenticatedPtRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
+  '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
+  '/_authenticated/pt/trainings': typeof AuthenticatedPtTrainingsRoute
+  '/_authenticated/pt/': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/pt/clients'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/pt'
+    | '/pt/clients'
+    | '/pt/payments'
+    | '/pt/trainings'
+    | '/pt/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/pt/clients'
+  to: '/login' | '/' | '/pt/clients' | '/pt/payments' | '/pt/trainings' | '/pt'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/pt'
     | '/_authenticated/'
     | '/_authenticated/pt/clients'
+    | '/_authenticated/pt/payments'
+    | '/_authenticated/pt/trainings'
+    | '/_authenticated/pt/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -92,24 +139,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/pt': {
+      id: '/_authenticated/pt'
+      path: '/pt'
+      fullPath: '/pt'
+      preLoaderRoute: typeof AuthenticatedPtRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pt/': {
+      id: '/_authenticated/pt/'
+      path: '/'
+      fullPath: '/pt/'
+      preLoaderRoute: typeof AuthenticatedPtIndexRouteImport
+      parentRoute: typeof AuthenticatedPtRoute
+    }
+    '/_authenticated/pt/trainings': {
+      id: '/_authenticated/pt/trainings'
+      path: '/trainings'
+      fullPath: '/pt/trainings'
+      preLoaderRoute: typeof AuthenticatedPtTrainingsRouteImport
+      parentRoute: typeof AuthenticatedPtRoute
+    }
+    '/_authenticated/pt/payments': {
+      id: '/_authenticated/pt/payments'
+      path: '/payments'
+      fullPath: '/pt/payments'
+      preLoaderRoute: typeof AuthenticatedPtPaymentsRouteImport
+      parentRoute: typeof AuthenticatedPtRoute
+    }
     '/_authenticated/pt/clients': {
       id: '/_authenticated/pt/clients'
-      path: '/pt/clients'
+      path: '/clients'
       fullPath: '/pt/clients'
       preLoaderRoute: typeof AuthenticatedPtClientsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedPtRoute
     }
   }
 }
 
-interface AuthenticatedRouteChildren {
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+interface AuthenticatedPtRouteChildren {
   AuthenticatedPtClientsRoute: typeof AuthenticatedPtClientsRoute
+  AuthenticatedPtPaymentsRoute: typeof AuthenticatedPtPaymentsRoute
+  AuthenticatedPtTrainingsRoute: typeof AuthenticatedPtTrainingsRoute
+  AuthenticatedPtIndexRoute: typeof AuthenticatedPtIndexRoute
+}
+
+const AuthenticatedPtRouteChildren: AuthenticatedPtRouteChildren = {
+  AuthenticatedPtClientsRoute: AuthenticatedPtClientsRoute,
+  AuthenticatedPtPaymentsRoute: AuthenticatedPtPaymentsRoute,
+  AuthenticatedPtTrainingsRoute: AuthenticatedPtTrainingsRoute,
+  AuthenticatedPtIndexRoute: AuthenticatedPtIndexRoute,
+}
+
+const AuthenticatedPtRouteWithChildren = AuthenticatedPtRoute._addFileChildren(
+  AuthenticatedPtRouteChildren,
+)
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedPtRoute: typeof AuthenticatedPtRouteWithChildren
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedPtRoute: AuthenticatedPtRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedPtClientsRoute: AuthenticatedPtClientsRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -123,13 +216,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

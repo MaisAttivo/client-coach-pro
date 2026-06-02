@@ -101,7 +101,7 @@ export function valorAPagar(
 export function previsaoCliente(c: PtClient): number {
   if (c.status !== "ativo" || c.forecast === "parar") return 0;
   if (c.forecast_valor != null) return Number(c.forecast_valor);
-  return Number(c.valor_acordado);
+  return valorAPagar(c);
 }
 
 export const fmtEUR = (n: number) =>

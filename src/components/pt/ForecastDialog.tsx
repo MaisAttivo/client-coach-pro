@@ -7,7 +7,7 @@ import {
 import { toast } from "sonner";
 import { TrendingUp } from "lucide-react";
 import {
-  updateClient, fmtEUR, previsaoCliente,
+  updateClient, fmtEUR, previsaoCliente, valorAPagar,
   type Forecast, type PtClient,
 } from "@/lib/pt-clients";
 
@@ -60,7 +60,7 @@ export function ForecastDialog({ open, onOpenChange, clients, onSaved }: Props) 
     if (!r) return s + previsaoCliente(c);
     if (r.forecast === "parar") return s;
     const v = num(r.forecast_valor);
-    return s + (v != null ? v : Number(c.valor_acordado));
+    return s + (v != null ? v : valorAPagar(c));
   }, 0);
 
   return (
@@ -89,7 +89,7 @@ export function ForecastDialog({ open, onOpenChange, clients, onSaved }: Props) 
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-sm truncate">{c.nome}</span>
                   <span className="text-[11px] text-muted-foreground font-mono shrink-0">
-                    {fmtEUR(Number(c.valor_acordado))} acordado
+                    {fmtEUR(valorAPagar(c))} líquido
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -106,7 +106,7 @@ export function ForecastDialog({ open, onOpenChange, clients, onSaved }: Props) 
                   </Select>
                   <Input
                     type="number" inputMode="decimal" step="0.01"
-                    placeholder={`€ ${Number(c.valor_acordado).toFixed(0)}`}
+                    placeholder={`€ ${valorAPagar(c).toFixed(0)}`}
                     value={r.forecast_valor}
                     disabled={parar}
                     onChange={(e) => setRows((s) => ({ ...s, [c.id]: { ...r, forecast_valor: e.target.value } }))}

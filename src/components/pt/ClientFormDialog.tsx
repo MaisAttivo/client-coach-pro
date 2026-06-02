@@ -8,8 +8,11 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 import {
-  createClient, updateClient, type Forecast, type PtClient, type ServiceType,
+  createClient, updateClient, deleteClient,
+  valorRealPT, valorAPagar, fmtEUR,
+  type ClientStatus, type Forecast, type PtClient, type ServiceType,
 } from "@/lib/pt-clients";
 
 interface Props {
@@ -17,94 +20,112 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   client: PtClient | null;
   onSaved: () => void;
+  defaultStatus?: ClientStatus;
 }
 
 interface FormState {
+  status: ClientStatus;
   nome: string;
+  telefone: string;
+  notas: string;
+  mes_inicio: string;
   service_type: ServiceType;
+  frequencia_semanal: string;
   valor_acordado: string;
-  valor_recebido: string;
-  valor_attivo: string;
-  valor_ginasio: string;
-  treinos_pagos: string;
-  treinos_dados: string;
+  valor_ginasio_por_treino: string;
+  valor_acompanhamento_online: string;
+  desconto_afiliado: string;
+  indicado_por: string;
   forecast: Forecast;
   forecast_valor: string;
   forecast_notas: string;
-  notas: string;
-  ativo: boolean;
 }
 
-const empty: FormState = {
+const empty = (status: ClientStatus = "ativo"): FormState => ({
+  status,
   nome: "",
+  telefone: "",
+  notas: "",
+  mes_inicio: "",
   service_type: "mensalidade",
+  frequencia_semanal: "2",
   valor_acordado: "",
-  valor_recebido: "",
-  valor_attivo: "",
-  valor_ginasio: "",
-  treinos_pagos: "",
-  treinos_dados: "",
-  forecast: "indefinido",
+  valor_ginasio_por_treino: "",
+  valor_acompanhamento_online: "",
+  desconto_afiliado: "",
+  indicado_por: "",
+  forecast: "continuar",
   forecast_valor: "",
   forecast_notas: "",
-  notas: "",
-  ativo: true,
-};
+});
 
-const num = (s: string) => (s.trim() === "" ? 0 : Number(s));
+const num = (s: string) => (s.trim() === "" ? 0 : Number(s.replace(",", ".")));
 
-export function ClientFormDialog({ open, onOpenChange, client, onSaved }: Props) {
-  const [form, setForm] = useState<FormState>(empty);
+export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultStatus }: Props) {
+  const [form, setForm] = useState<FormState>(empty(defaultStatus));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (client) {
       setForm({
+        status: client.status,
         nome: client.nome,
+        telefone: client.telefone ?? "",
+        notas: client.notas ?? "",
+        mes_inicio: client.mes_inicio ?? "",
         service_type: client.service_type,
+        frequencia_semanal: String(client.frequencia_semanal ?? 2),
         valor_acordado: String(client.valor_acordado ?? ""),
-        valor_recebido: String(client.valor_recebido ?? ""),
-        valor_attivo: String(client.valor_attivo ?? ""),
-        valor_ginasio: String(client.valor_ginasio ?? ""),
-        treinos_pagos: String(client.treinos_pagos ?? ""),
-        treinos_dados: String(client.treinos_dados ?? ""),
+        valor_ginasio_por_treino: String(client.valor_ginasio_por_treino ?? ""),
+        valor_acompanhamento_online: String(client.valor_acompanhamento_online ?? ""),
+        desconto_afiliado: String(client.desconto_afiliado ?? ""),
+        indicado_por: client.indicado_por ?? "",
         forecast: client.forecast,
         forecast_valor: client.forecast_valor != null ? String(client.forecast_valor) : "",
         forecast_notas: client.forecast_notas ?? "",
-        notas: client.notas ?? "",
-        ativo: client.ativo,
       });
     } else {
-      setForm(empty);
+      setForm(empty(defaultStatus));
     }
-  }, [client, open]);
+  }, [client, open, defaultStatus]);
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const treinosRestantes = num(form.treinos_pagos) - num(form.treinos_dados);
+  const isProspect = form.status === "prospect";
+  const computed = {
+    valor_acordado: num(form.valor_acordado),
+    valor_ginasio_por_treino: num(form.valor_ginasio_por_treino),
+    frequencia_semanal: num(form.frequencia_semanal),
+    desconto_afiliado: num(form.desconto_afiliado),
+  };
+  const realPT = valorRealPT(computed);
+  const aPagar = valorAPagar(computed);
 
   const handleSave = async () => {
     if (!form.nome.trim()) {
-      toast.error("Indica o nome do cliente.");
+      toast.error("Indica o nome.");
       return;
     }
     setSaving(true);
     try {
       const payload = {
+        status: form.status,
         nome: form.nome.trim(),
+        telefone: form.telefone.trim() || null,
+        notas: form.notas.trim() || null,
+        mes_inicio: form.mes_inicio || null,
         service_type: form.service_type,
+        frequencia_semanal: Math.trunc(num(form.frequencia_semanal)),
         valor_acordado: num(form.valor_acordado),
-        valor_recebido: num(form.valor_recebido),
-        valor_attivo: num(form.valor_attivo),
-        valor_ginasio: num(form.valor_ginasio),
-        treinos_pagos: Math.trunc(num(form.treinos_pagos)),
-        treinos_dados: Math.trunc(num(form.treinos_dados)),
+        valor_ginasio_por_treino: num(form.valor_ginasio_por_treino),
+        valor_acompanhamento_online: num(form.valor_acompanhamento_online),
+        desconto_afiliado: num(form.desconto_afiliado),
+        indicado_por: form.indicado_por.trim() || null,
         forecast: form.forecast,
         forecast_valor: form.forecast_valor.trim() === "" ? null : num(form.forecast_valor),
         forecast_notas: form.forecast_notas.trim() || null,
-        notas: form.notas.trim() || null,
-        ativo: form.ativo,
+        // legacy fields kept to satisfy NOT NULL defaults
       };
       if (client) {
         await updateClient(client.id, payload);
@@ -116,11 +137,50 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved }: Props)
       onSaved();
       onOpenChange(false);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Erro a guardar";
-      toast.error(msg);
+      toast.error(e instanceof Error ? e.message : "Erro a guardar");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSuspend = async () => {
+    if (!client) return;
+    setSaving(true);
+    try {
+      await updateClient(client.id, { status: "antigo" });
+      toast.success("Cliente suspenso");
+      onSaved();
+      onOpenChange(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro");
+    } finally { setSaving(false); }
+  };
+
+  const handleReactivate = async () => {
+    if (!client) return;
+    setSaving(true);
+    try {
+      await updateClient(client.id, { status: "ativo" });
+      toast.success("Cliente reativado");
+      onSaved();
+      onOpenChange(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro");
+    } finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    if (!client) return;
+    if (!confirm(`Eliminar definitivamente ${client.nome}?`)) return;
+    setSaving(true);
+    try {
+      await deleteClient(client.id);
+      toast.success("Eliminado");
+      onSaved();
+      onOpenChange(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro");
+    } finally { setSaving(false); }
   };
 
   return (
@@ -128,112 +188,170 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved }: Props)
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-surface border-border">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
-            {client ? `Editar #${client.numero} · ${client.nome}` : "Novo cliente"}
+            {client ? `Editar · ${client.nome}` : "Novo cliente"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="nome">Nome</Label>
-            <Input id="nome" value={form.nome} onChange={(e) => set("nome", e.target.value)} />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>Tipo de serviço</Label>
-            <Select value={form.service_type} onValueChange={(v) => set("service_type", v as ServiceType)}>
+          <Field label="Estado">
+            <Select value={form.status} onValueChange={(v) => set("status", v as ClientStatus)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="mensalidade">Mensalidade</SelectItem>
-                <SelectItem value="pack">Pack</SelectItem>
+                <SelectItem value="ativo">Cliente ativo</SelectItem>
+                <SelectItem value="antigo">Antigo</SelectItem>
+                <SelectItem value="prospect">Prospect</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="va">Valor acordado (€)</Label>
-            <Input id="va" type="number" inputMode="decimal" step="0.01"
-              value={form.valor_acordado} onChange={(e) => set("valor_acordado", e.target.value)} />
-          </div>
+          <Field label="Nome">
+            <Input value={form.nome} onChange={(e) => set("nome", e.target.value)} />
+          </Field>
 
-          <div className="rounded-lg bg-muted/40 p-3 space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Divisão do valor</p>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1">
-                <Label htmlFor="vr" className="text-xs">Eu</Label>
-                <Input id="vr" type="number" inputMode="decimal" step="0.01"
-                  value={form.valor_recebido} onChange={(e) => set("valor_recebido", e.target.value)} />
+          <Field label="Telefone">
+            <Input type="tel" inputMode="tel" value={form.telefone} onChange={(e) => set("telefone", e.target.value)} />
+          </Field>
+
+          <Field label="Observações">
+            <Textarea rows={2} value={form.notas} onChange={(e) => set("notas", e.target.value)} placeholder="Observações…" />
+          </Field>
+
+          {!isProspect && (
+            <>
+              <Field label="Mês de início" hint="Não conta como “não pago” em meses anteriores.">
+                <Input type="month" value={form.mes_inicio ? form.mes_inicio.slice(0, 7) : ""}
+                  onChange={(e) => set("mes_inicio", e.target.value ? `${e.target.value}-01` : "")} />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Tipo">
+                  <Select value={form.service_type} onValueChange={(v) => set("service_type", v as ServiceType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mensalidade">Mensalidade</SelectItem>
+                      <SelectItem value="pack">Pack</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Frequência">
+                  <Select value={form.frequencia_semanal} onValueChange={(v) => set("frequencia_semanal", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1x / semana</SelectItem>
+                      <SelectItem value="2">2x / semana</SelectItem>
+                      <SelectItem value="3">3x / semana</SelectItem>
+                      <SelectItem value="4">4x / semana</SelectItem>
+                      <SelectItem value="5">5x / semana</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="vat" className="text-xs">+Attivo</Label>
-                <Input id="vat" type="number" inputMode="decimal" step="0.01"
-                  value={form.valor_attivo} onChange={(e) => set("valor_attivo", e.target.value)} />
+
+              <Field label="Valor total acordado (€)">
+                <Input type="number" inputMode="decimal" step="0.01"
+                  value={form.valor_acordado} onChange={(e) => set("valor_acordado", e.target.value)} />
+              </Field>
+
+              <div className="rounded-xl bg-muted/50 p-3 space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Decomposição
+                </p>
+                <Field label="Ginásio por treino (€)">
+                  <Input type="number" inputMode="decimal" step="0.01"
+                    value={form.valor_ginasio_por_treino} onChange={(e) => set("valor_ginasio_por_treino", e.target.value)} />
+                </Field>
+                <Field label="Acompanhamento online (€)">
+                  <Input type="number" inputMode="decimal" step="0.01"
+                    value={form.valor_acompanhamento_online} onChange={(e) => set("valor_acompanhamento_online", e.target.value)} />
+                </Field>
+                <Field label="Desconto afiliado (€)">
+                  <Input type="number" inputMode="decimal" step="0.01"
+                    value={form.desconto_afiliado} onChange={(e) => set("desconto_afiliado", e.target.value)} />
+                </Field>
+
+                <div className="text-xs space-y-0.5 pt-1 border-t border-border/60">
+                  <Row label="Valor real PT" value={fmtEUR(realPT)} />
+                  {computed.desconto_afiliado > 0 && (
+                    <Row label="A pagar (c/ desconto)" value={fmtEUR(aPagar)} accent />
+                  )}
+                </div>
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="vg" className="text-xs">Ginásio</Label>
-                <Input id="vg" type="number" inputMode="decimal" step="0.01"
-                  value={form.valor_ginasio} onChange={(e) => set("valor_ginasio", e.target.value)} />
+
+              <Field label="Indicado por (opcional)">
+                <Input value={form.indicado_por} onChange={(e) => set("indicado_por", e.target.value)} />
+              </Field>
+
+              <div className="rounded-xl bg-muted/50 p-3 space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Previsão próximo mês
+                </p>
+                <Select value={form.forecast} onValueChange={(v) => set("forecast", v as Forecast)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="continuar">Vai continuar</SelectItem>
+                    <SelectItem value="parar">Vai parar</SelectItem>
+                    <SelectItem value="indefinido">Indefinido</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Field label="Valor previsto (€) — opcional">
+                  <Input type="number" inputMode="decimal" step="0.01"
+                    value={form.forecast_valor} onChange={(e) => set("forecast_valor", e.target.value)} />
+                </Field>
+                <Field label="Notas">
+                  <Textarea rows={2}
+                    value={form.forecast_notas} onChange={(e) => set("forecast_notas", e.target.value)} />
+                </Field>
               </div>
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Soma: <span className="font-mono">{(num(form.valor_recebido) + num(form.valor_attivo) + num(form.valor_ginasio)).toFixed(2)}€</span>
-              {" "}/ acordado <span className="font-mono">{num(form.valor_acordado).toFixed(2)}€</span>
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="tp">Treinos pagos</Label>
-              <Input id="tp" type="number" inputMode="numeric" min="0"
-                value={form.treinos_pagos} onChange={(e) => set("treinos_pagos", e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="td">Treinos dados</Label>
-              <Input id="td" type="number" inputMode="numeric" min="0"
-                value={form.treinos_dados} onChange={(e) => set("treinos_dados", e.target.value)} />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground -mt-2">
-            Restantes: <span className={`font-mono font-semibold ${treinosRestantes < 0 ? "text-destructive" : "text-primary"}`}>{treinosRestantes}</span>
-          </p>
-
-          <div className="rounded-lg bg-muted/40 p-3 space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Previsão próximo mês</p>
-            <Select value={form.forecast} onValueChange={(v) => set("forecast", v as Forecast)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="indefinido">Indefinido</SelectItem>
-                <SelectItem value="continuar">Continua</SelectItem>
-                <SelectItem value="parar">Vai parar</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="space-y-1.5">
-              <Label htmlFor="fv" className="text-xs">Valor previsto (€)</Label>
-              <Input id="fv" type="number" inputMode="decimal" step="0.01"
-                value={form.forecast_valor} onChange={(e) => set("forecast_valor", e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="fn" className="text-xs">Notas da previsão</Label>
-              <Textarea id="fn" rows={2}
-                value={form.forecast_notas} onChange={(e) => set("forecast_notas", e.target.value)} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="notas">Notas gerais</Label>
-            <Textarea id="notas" rows={3}
-              value={form.notas} onChange={(e) => set("notas", e.target.value)} />
-          </div>
+            </>
+          )}
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "A guardar…" : client ? "Guardar" : "Criar cliente"}
-          </Button>
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
+          <div className="flex gap-2 w-full">
+            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving} className="flex-1">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={saving} className="flex-[2]">
+              {saving ? "A guardar…" : client ? "Guardar" : "Criar"}
+            </Button>
+          </div>
+          {client && (
+            <div className="flex gap-2 w-full">
+              {client.status === "ativo" ? (
+                <Button variant="outline" onClick={handleSuspend} disabled={saving} className="flex-1">
+                  Suspender
+                </Button>
+              ) : client.status === "antigo" ? (
+                <Button variant="outline" onClick={handleReactivate} disabled={saving} className="flex-1">
+                  Reativar
+                </Button>
+              ) : null}
+              <Button variant="destructive" size="icon" onClick={handleDelete} disabled={saving}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      {children}
+      {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function Row({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`font-mono ${accent ? "text-primary font-semibold" : "text-foreground"}`}>{value}</span>
+    </div>
   );
 }

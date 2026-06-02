@@ -7,7 +7,7 @@ import {
 import { toast } from "sonner";
 import { TrendingUp } from "lucide-react";
 import {
-  updateClient, fmtEUR, previsaoCliente,
+  updateClient, fmtEUR, previsaoCliente, valorAPagar,
   type Forecast, type PtClient,
 } from "@/lib/pt-clients";
 

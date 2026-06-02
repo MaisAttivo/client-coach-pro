@@ -257,10 +257,11 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Decomposição
                 </p>
-                <Field label="Ginásio por treino (€)">
+                <Field label="Ginásio mensal (€)">
                   <Input type="number" inputMode="decimal" step="0.01"
                     value={form.valor_ginasio_por_treino} onChange={(e) => set("valor_ginasio_por_treino", e.target.value)} />
                 </Field>
+
                 <Field label="Acompanhamento online (€)">
                   <Input type="number" inputMode="decimal" step="0.01"
                     value={form.valor_acompanhamento_online} onChange={(e) => set("valor_acompanhamento_online", e.target.value)} />

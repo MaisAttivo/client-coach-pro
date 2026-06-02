@@ -98,7 +98,7 @@ function DashboardPage() {
               <p className="font-display text-3xl mt-1 text-foreground">{fmtEUR(previstoProx)}</p>
               {vaiParar.length > 0 && (
                 <p className="text-xs text-destructive mt-1">
-                  −{fmtEUR(vaiParar.reduce((s, c) => s + Number(c.valor_acordado || 0), 0))} de {vaiParar.length} a sair
+                  −{fmtEUR(vaiParar.reduce((s, c) => s + valorAPagar(c), 0))} de {vaiParar.length} a sair
                 </p>
               )}
             </div>

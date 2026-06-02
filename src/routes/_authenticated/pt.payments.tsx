@@ -153,7 +153,18 @@ function PaymentsPage() {
         clients={ativos}
         defaultMonth={mes}
         defaultClientId={preselectClient}
-        onSaved={() => refetch()}
+        onSaved={(c) => {
+          refetch();
+          setTrainingsClient(c);
+          setTrainingsDialogOpen(true);
+        }}
+      />
+
+      <AddTrainingsDialog
+        open={trainingsDialogOpen}
+        onOpenChange={setTrainingsDialogOpen}
+        client={trainingsClient}
+        onDone={() => refetch()}
       />
     </main>
   );

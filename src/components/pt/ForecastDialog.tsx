@@ -60,7 +60,7 @@ export function ForecastDialog({ open, onOpenChange, clients, onSaved }: Props) 
     if (!r) return s + previsaoCliente(c);
     if (r.forecast === "parar") return s;
     const v = num(r.forecast_valor);
-    return s + (v != null ? v : Number(c.valor_acordado));
+    return s + (v != null ? v : valorAPagar(c));
   }, 0);
 
   return (

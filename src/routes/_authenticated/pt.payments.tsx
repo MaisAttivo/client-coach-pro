@@ -35,7 +35,7 @@ function PaymentsPage() {
     return map;
   }, [payments]);
 
-  const totalRecebido = payments.reduce((s, p) => s + Number(p.valor_pago), 0);
+  const totalRecebido = payments.reduce((s, p) => s + Number(p.valor_pt ?? p.valor_pago), 0);
   const emFalta = ativos.filter((c) => !byClient[c.id]);
   const totalFalta = emFalta.reduce((s, c) => s + valorAPagar(c), 0);
 

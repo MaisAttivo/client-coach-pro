@@ -24,9 +24,30 @@ function FixasPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<FinFixed | null>(null);
   const [showInactive, setShowInactive] = useState(false);
+  const [payCredit, setPayCredit] = useState<FinCredit | null>(null);
+
+  const ym = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }, []);
 
   const { data: fixed = [] } = useQuery({ queryKey: ["fin_fixed"], queryFn: listFixed });
   const { data: categories = [] } = useQuery({ queryKey: ["fin_categories"], queryFn: listCategories });
+  const { data: credits = [] } = useQuery({ queryKey: ["fin_credits"], queryFn: listCredits });
+  const { data: monthTx = [] } = useQuery({
+    queryKey: ["fin_tx", ym],
+    queryFn: () => listTransactionsByMonth(ym),
+  });
+
+  const creditTxByCredit = useMemo(() => {
+    const m = new Map<string, typeof monthTx[number]>();
+    for (const t of monthTx) {
+      if (t.credit_id) m.set(t.credit_id, t);
+    }
+    return m;
+  }, [monthTx]);
+
+  const activeCredits = credits.filter((c) => c.ativo);
 
   const visible = useMemo(
     () => fixed.filter((f) => (showInactive ? true : f.ativo)),
@@ -42,13 +63,20 @@ function FixasPage() {
     return m;
   }, [visible]);
 
-  const totalMensal = visible.filter((f) => f.ativo).reduce((s, f) => s + valorMensalEfetivo(f), 0);
+  const totalFixasMensal = visible.filter((f) => f.ativo).reduce((s, f) => s + valorMensalEfetivo(f), 0);
   const totalProvisoes = visible
     .filter((f) => f.ativo && f.tipo_recorrencia === "anual_provisao")
     .reduce((s, f) => s + valorMensalEfetivo(f), 0);
+  const totalCreditos = activeCredits.reduce((s, c) => {
+    const tx = creditTxByCredit.get(c.id);
+    return s + (tx ? Number(tx.valor) : Number(c.prestacao_mensal ?? 0));
+  }, 0);
+  const totalMensal = totalFixasMensal + totalCreditos;
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["fin_fixed"] });
+    qc.invalidateQueries({ queryKey: ["fin_credits"] });
+    qc.invalidateQueries({ queryKey: ["fin_tx", ym] });
     qc.invalidateQueries({ queryKey: ["fin_overview"] });
   };
 

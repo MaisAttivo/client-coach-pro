@@ -15,14 +15,17 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   debt: FinDebt | null;
   onSaved: () => void;
+  defaultPessoa?: string;
 }
 
-export function DebtDialog({ open, onOpenChange, debt, onSaved }: Props) {
+export function DebtDialog({ open, onOpenChange, debt, onSaved, defaultPessoa }: Props) {
   const [direcao, setDirecao] = useState<Direcao>("devo");
   const [pessoa, setPessoa] = useState("");
   const [valor, setValor] = useState("");
+  const [valorPago, setValorPago] = useState("");
   const [descricao, setDescricao] = useState("");
   const [data, setData] = useState(() => new Date().toISOString().slice(0, 10));
+  const [dataPrevista, setDataPrevista] = useState("");
   const [notas, setNotas] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -32,18 +35,24 @@ export function DebtDialog({ open, onOpenChange, debt, onSaved }: Props) {
       setDirecao(debt.direcao as Direcao);
       setPessoa(debt.pessoa);
       setValor(String(debt.valor));
+      setValorPago(debt.valor_pago ? String(debt.valor_pago) : "");
       setDescricao(debt.descricao ?? "");
       setData(debt.data);
+      setDataPrevista(debt.data_prevista ?? "");
       setNotas(debt.notas ?? "");
     } else {
       setDirecao("devo");
-      setPessoa("");
+      setPessoa(defaultPessoa ?? "");
       setValor("");
+      setValorPago("");
       setDescricao("");
       setData(new Date().toISOString().slice(0, 10));
+      setDataPrevista("");
       setNotas("");
     }
-  }, [open, debt]);
+  }, [open, debt, defaultPessoa]);
+
+  const restante = Math.max(0, Number(valor || 0) - Number(valorPago || 0));
 
   const save = async () => {
     if (!pessoa.trim() || !valor) {
@@ -52,13 +61,20 @@ export function DebtDialog({ open, onOpenChange, debt, onSaved }: Props) {
     }
     setSaving(true);
     try {
+      const vp = Number(valorPago || 0);
+      const v = Number(valor);
+      const totalPago = vp >= v && v > 0;
       const payload = {
         pessoa: pessoa.trim(),
         direcao,
-        valor: Number(valor),
+        valor: v,
+        valor_pago: vp,
         descricao: descricao.trim() || null,
         data,
+        data_prevista: dataPrevista || null,
         notas: notas.trim() || null,
+        pago: totalPago,
+        data_pago: totalPago ? (debt?.data_pago ?? new Date().toISOString().slice(0, 10)) : null,
       };
       if (debt) await updateDebt(debt.id, payload);
       else await createDebt(payload);
@@ -74,7 +90,7 @@ export function DebtDialog({ open, onOpenChange, debt, onSaved }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{debt ? "Editar dívida" : "Nova dívida"}</DialogTitle>
         </DialogHeader>
@@ -94,12 +110,29 @@ export function DebtDialog({ open, onOpenChange, debt, onSaved }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Valor (€)</Label>
+              <Label>Valor total (€)</Label>
               <Input type="number" inputMode="decimal" step="0.01" value={valor} onChange={(e) => setValor(e.target.value)} />
             </div>
             <div className="space-y-1.5">
+              <Label>Já pago (€)</Label>
+              <Input type="number" inputMode="decimal" step="0.01" value={valorPago} onChange={(e) => setValorPago(e.target.value)} placeholder="0" />
+            </div>
+          </div>
+          {Number(valorPago || 0) > 0 && (
+            <p className="text-[11px] text-muted-foreground -mt-2">
+              Restante: <span className="font-mono text-foreground">{restante.toFixed(2)} €</span>
+              {restante === 0 && " · será marcada como paga"}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
               <Label>Data</Label>
               <Input type="date" value={data} onChange={(e) => setData(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Prevista</Label>
+              <Input type="date" value={dataPrevista} onChange={(e) => setDataPrevista(e.target.value)} />
             </div>
           </div>
 

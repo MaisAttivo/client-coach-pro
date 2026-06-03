@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPtRouteImport } from './routes/_authenticated/pt'
 import { Route as AuthenticatedFinancasRouteImport } from './routes/_authenticated/financas'
 import { Route as AuthenticatedPtIndexRouteImport } from './routes/_authenticated/pt.index'
+import { Route as AuthenticatedFinancasIndexRouteImport } from './routes/_authenticated/financas.index'
 import { Route as AuthenticatedPtTrainingsRouteImport } from './routes/_authenticated/pt.trainings'
 import { Route as AuthenticatedPtReportsRouteImport } from './routes/_authenticated/pt.reports'
 import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
@@ -49,6 +50,12 @@ const AuthenticatedPtIndexRoute = AuthenticatedPtIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedPtRoute,
 } as any)
+const AuthenticatedFinancasIndexRoute =
+  AuthenticatedFinancasIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFinancasRoute,
+  } as any)
 const AuthenticatedPtTrainingsRoute =
   AuthenticatedPtTrainingsRouteImport.update({
     id: '/trainings',
@@ -74,35 +81,37 @@ const AuthenticatedPtClientsRoute = AuthenticatedPtClientsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
-  '/financas': typeof AuthenticatedFinancasRoute
+  '/financas': typeof AuthenticatedFinancasRouteWithChildren
   '/pt': typeof AuthenticatedPtRouteWithChildren
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
   '/pt/reports': typeof AuthenticatedPtReportsRoute
   '/pt/trainings': typeof AuthenticatedPtTrainingsRoute
+  '/financas/': typeof AuthenticatedFinancasIndexRoute
   '/pt/': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/financas': typeof AuthenticatedFinancasRoute
   '/': typeof AuthenticatedIndexRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
   '/pt/reports': typeof AuthenticatedPtReportsRoute
   '/pt/trainings': typeof AuthenticatedPtTrainingsRoute
+  '/financas': typeof AuthenticatedFinancasIndexRoute
   '/pt': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authenticated/financas': typeof AuthenticatedFinancasRoute
+  '/_authenticated/financas': typeof AuthenticatedFinancasRouteWithChildren
   '/_authenticated/pt': typeof AuthenticatedPtRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
   '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
   '/_authenticated/pt/reports': typeof AuthenticatedPtReportsRoute
   '/_authenticated/pt/trainings': typeof AuthenticatedPtTrainingsRoute
+  '/_authenticated/financas/': typeof AuthenticatedFinancasIndexRoute
   '/_authenticated/pt/': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRouteTypes {
@@ -116,16 +125,17 @@ export interface FileRouteTypes {
     | '/pt/payments'
     | '/pt/reports'
     | '/pt/trainings'
+    | '/financas/'
     | '/pt/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
-    | '/financas'
     | '/'
     | '/pt/clients'
     | '/pt/payments'
     | '/pt/reports'
     | '/pt/trainings'
+    | '/financas'
     | '/pt'
   id:
     | '__root__'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pt/payments'
     | '/_authenticated/pt/reports'
     | '/_authenticated/pt/trainings'
+    | '/_authenticated/financas/'
     | '/_authenticated/pt/'
   fileRoutesById: FileRoutesById
 }
@@ -190,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPtIndexRouteImport
       parentRoute: typeof AuthenticatedPtRoute
     }
+    '/_authenticated/financas/': {
+      id: '/_authenticated/financas/'
+      path: '/'
+      fullPath: '/financas/'
+      preLoaderRoute: typeof AuthenticatedFinancasIndexRouteImport
+      parentRoute: typeof AuthenticatedFinancasRoute
+    }
     '/_authenticated/pt/trainings': {
       id: '/_authenticated/pt/trainings'
       path: '/trainings'
@@ -221,6 +239,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedFinancasRouteChildren {
+  AuthenticatedFinancasIndexRoute: typeof AuthenticatedFinancasIndexRoute
+}
+
+const AuthenticatedFinancasRouteChildren: AuthenticatedFinancasRouteChildren = {
+  AuthenticatedFinancasIndexRoute: AuthenticatedFinancasIndexRoute,
+}
+
+const AuthenticatedFinancasRouteWithChildren =
+  AuthenticatedFinancasRoute._addFileChildren(
+    AuthenticatedFinancasRouteChildren,
+  )
+
 interface AuthenticatedPtRouteChildren {
   AuthenticatedPtClientsRoute: typeof AuthenticatedPtClientsRoute
   AuthenticatedPtPaymentsRoute: typeof AuthenticatedPtPaymentsRoute
@@ -242,13 +273,13 @@ const AuthenticatedPtRouteWithChildren = AuthenticatedPtRoute._addFileChildren(
 )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedFinancasRoute: typeof AuthenticatedFinancasRoute
+  AuthenticatedFinancasRoute: typeof AuthenticatedFinancasRouteWithChildren
   AuthenticatedPtRoute: typeof AuthenticatedPtRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedFinancasRoute: AuthenticatedFinancasRoute,
+  AuthenticatedFinancasRoute: AuthenticatedFinancasRouteWithChildren,
   AuthenticatedPtRoute: AuthenticatedPtRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }

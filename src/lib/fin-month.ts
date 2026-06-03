@@ -4,11 +4,12 @@ import { listTransactionsByMonth, type FinTransaction } from "./fin-transactions
 import { listPaymentsByMonth, type PtPayment } from "./pt-payments";
 
 export type CategoryBreakdown = {
-  categoria_id: string | null;
+  id: string | null;
   nome: string;
   cor: string;
   total: number;
 };
+
 
 export type MonthOverview = {
   receitas: { pt: number; manual: number; total: number };

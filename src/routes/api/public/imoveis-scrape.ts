@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { scrapeForOwner } from "@/lib/imoveis-scrape.functions";
+import { scrapeForOwner } from "@/lib/imoveis-scrape.server";
 
 export const Route = createFileRoute("/api/public/imoveis-scrape")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const cronSecret = process.env.CRON_SECRET;
-        const provided = request.headers.get("x-cron-secret");
-        if (!cronSecret || provided !== cronSecret) {
+        const expected =
+          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
+        const provided = request.headers.get("apikey");
+        if (!expected || provided !== expected) {
           return new Response("Unauthorized", { status: 401 });
         }
 

@@ -396,13 +396,14 @@ function Row({ label, value, icon: Icon }: { label: string; value: string; icon?
 }
 
 function Stat({
-  icon: Icon, value, label, tone = "default", small = false,
+  icon: Icon, value, label, tone = "default", small = false, blur = false,
 }: {
   icon: typeof Users;
   value: number | string;
   label: string;
   tone?: "default" | "danger";
   small?: boolean;
+  blur?: boolean;
 }) {
   return (
     <Card className="p-4 bg-surface border-border">
@@ -410,7 +411,7 @@ function Stat({
         className={`w-3.5 h-3.5 mb-3 ${tone === "danger" ? "text-destructive" : "text-primary"}`}
         strokeWidth={1.8}
       />
-      <p className={`font-display ${small ? "text-xl" : "text-3xl"} leading-none font-semibold tracking-tight`}>
+      <p className={`font-display ${small ? "text-xl" : "text-3xl"} leading-none font-semibold tracking-tight ${blur ? "privacy-blur" : ""}`}>
         {value}
       </p>
       <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1.5">{label}</p>

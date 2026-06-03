@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedPtRouteImport } from './routes/_authenticated/pt'
+import { Route as AuthenticatedImobiliarioRouteImport } from './routes/_authenticated/imobiliario'
 import { Route as AuthenticatedFinancasRouteImport } from './routes/_authenticated/financas'
 import { Route as AuthenticatedPtIndexRouteImport } from './routes/_authenticated/pt.index'
 import { Route as AuthenticatedFinancasIndexRouteImport } from './routes/_authenticated/financas.index'
@@ -43,6 +44,12 @@ const AuthenticatedPtRoute = AuthenticatedPtRouteImport.update({
   path: '/pt',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedImobiliarioRoute =
+  AuthenticatedImobiliarioRouteImport.update({
+    id: '/imobiliario',
+    path: '/imobiliario',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedFinancasRoute = AuthenticatedFinancasRouteImport.update({
   id: '/financas',
   path: '/financas',
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/financas': typeof AuthenticatedFinancasRouteWithChildren
+  '/imobiliario': typeof AuthenticatedImobiliarioRoute
   '/pt': typeof AuthenticatedPtRouteWithChildren
   '/financas/categorias': typeof AuthenticatedFinancasCategoriasRoute
   '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
@@ -116,6 +124,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/imobiliario': typeof AuthenticatedImobiliarioRoute
   '/': typeof AuthenticatedIndexRoute
   '/financas/categorias': typeof AuthenticatedFinancasCategoriasRoute
   '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
@@ -132,6 +141,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/financas': typeof AuthenticatedFinancasRouteWithChildren
+  '/_authenticated/imobiliario': typeof AuthenticatedImobiliarioRoute
   '/_authenticated/pt': typeof AuthenticatedPtRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/financas/categorias': typeof AuthenticatedFinancasCategoriasRoute
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/financas'
+    | '/imobiliario'
     | '/pt'
     | '/financas/categorias'
     | '/financas/fixas'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/imobiliario'
     | '/'
     | '/financas/categorias'
     | '/financas/fixas'
@@ -178,6 +190,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/financas'
+    | '/_authenticated/imobiliario'
     | '/_authenticated/pt'
     | '/_authenticated/'
     | '/_authenticated/financas/categorias'
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/pt'
       fullPath: '/pt'
       preLoaderRoute: typeof AuthenticatedPtRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/imobiliario': {
+      id: '/_authenticated/imobiliario'
+      path: '/imobiliario'
+      fullPath: '/imobiliario'
+      preLoaderRoute: typeof AuthenticatedImobiliarioRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/financas': {
@@ -340,12 +360,14 @@ const AuthenticatedPtRouteWithChildren = AuthenticatedPtRoute._addFileChildren(
 
 interface AuthenticatedRouteChildren {
   AuthenticatedFinancasRoute: typeof AuthenticatedFinancasRouteWithChildren
+  AuthenticatedImobiliarioRoute: typeof AuthenticatedImobiliarioRoute
   AuthenticatedPtRoute: typeof AuthenticatedPtRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFinancasRoute: AuthenticatedFinancasRouteWithChildren,
+  AuthenticatedImobiliarioRoute: AuthenticatedImobiliarioRoute,
   AuthenticatedPtRoute: AuthenticatedPtRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
@@ -361,3 +383,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -207,10 +207,10 @@ function ReportsPage() {
           <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground font-medium">
             Receita total
           </p>
-          <p className="font-display text-5xl mt-3 text-foreground font-semibold tracking-tight">
+          <p className="font-display text-5xl mt-3 text-foreground font-semibold tracking-tight privacy-blur">
             {fmtEUR(receitaTotal)}
           </p>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-2 privacy-blur">
             {payments.length} pagamentos · média {fmtEUR(mediaReceitaMes)}/mês
           </p>
         </div>

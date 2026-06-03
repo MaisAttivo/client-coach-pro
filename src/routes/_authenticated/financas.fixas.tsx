@@ -187,11 +187,61 @@ function FixasPage() {
         })
       )}
 
+      {activeCredits.length > 0 && (
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center gap-2 pl-1">
+            <Landmark className="w-3 h-3 text-[var(--color-warning)]" />
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Créditos — {ym}
+            </p>
+          </div>
+          {activeCredits.map((c) => {
+            const tx = creditTxByCredit.get(c.id) ?? null;
+            const valor = tx ? Number(tx.valor) : Number(c.prestacao_mensal ?? 0);
+            const pago = !!tx;
+            return (
+              <Card key={c.id} className="p-3 bg-surface border-border flex items-center gap-3">
+                <button
+                  onClick={() => setPayCredit(c)}
+                  className={`shrink-0 w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
+                    pago ? "bg-primary border-primary text-primary-foreground" : "border-border hover:border-primary"
+                  }`}
+                  title={pago ? "Editar pagamento" : "Registar pagamento"}
+                >
+                  {pago ? <Check className="w-3.5 h-3.5" /> : <Landmark className="w-3.5 h-3.5 text-muted-foreground" />}
+                </button>
+                <button onClick={() => setPayCredit(c)} className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{c.nome}</p>
+                    {pago && <Badge variant="outline" className="text-[9px] py-0 h-4">pago</Badge>}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground privacy-blur">
+                    {c.dia_pagamento ? `Dia ${c.dia_pagamento} · ` : ""}
+                    Em dívida {fmtEUR(Number(c.valor_em_divida))}
+                  </p>
+                </button>
+                <span className={`font-mono text-sm shrink-0 privacy-blur ${pago ? "text-primary" : "text-muted-foreground"}`}>
+                  {fmtEUR(valor)}
+                </span>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
       <FixedExpenseDialog
         open={open}
         onOpenChange={setOpen}
         categories={categories}
         editing={editing}
+        onSaved={invalidate}
+      />
+      <CreditPaymentDialog
+        open={!!payCredit}
+        onOpenChange={(v) => { if (!v) setPayCredit(null); }}
+        credit={payCredit}
+        ym={ym}
+        existing={payCredit ? (creditTxByCredit.get(payCredit.id) ?? null) : null}
         onSaved={invalidate}
       />
     </main>

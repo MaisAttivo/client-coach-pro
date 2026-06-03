@@ -39,6 +39,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const isDynamicImportError = isRecoverableImportError(error);
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -52,7 +53,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              if (isDynamicImportError) {
+                recoverFromImportError();
+                return;
+              }
+              router.invalidate();
+              reset();
+            }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             Tentar de novo
@@ -67,6 +75,32 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       </div>
     </div>
   );
+}
+
+function isRecoverableImportError(error: Error) {
+  return /dynamically imported module|module script|Loading chunk|Importing a module/i.test(
+    error.message,
+  );
+}
+
+async function recoverFromImportError() {
+  if (typeof window === "undefined") return;
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.allSettled(registrations.map((registration) => registration.unregister()));
+    }
+
+    if ("caches" in window) {
+      const cacheNames = await window.caches.keys();
+      await Promise.allSettled(cacheNames.map((cacheName) => window.caches.delete(cacheName)));
+    }
+  } finally {
+    const url = new URL(window.location.href);
+    url.searchParams.set("app_refresh", Date.now().toString());
+    window.location.replace(url.toString());
+  }
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({

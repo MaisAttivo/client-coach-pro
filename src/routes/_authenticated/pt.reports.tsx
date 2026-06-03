@@ -144,8 +144,8 @@ function ReportsPage() {
     n: ativos.filter((c) => c.frequencia_semanal === f).length,
   })).filter((r) => r.n > 0);
 
-  // Net growth
-  const netGrowth = novos12m - saidas12m;
+  // Net growth do mês atual
+  const netGrowth = novosMes - saidasMes;
 
   // Taxa de retenção: ativos / (ativos + antigos)
   const retencao = ativos.length + antigos.length > 0

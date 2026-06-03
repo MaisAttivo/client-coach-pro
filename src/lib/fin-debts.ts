@@ -1,9 +1,18 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
-export type FinDebt = Database["public"]["Tables"]["fin_debts"]["Row"];
-export type FinDebtInsert = Database["public"]["Tables"]["fin_debts"]["Insert"];
-export type FinDebtUpdate = Database["public"]["Tables"]["fin_debts"]["Update"];
+export type FinDebt = Database["public"]["Tables"]["fin_debts"]["Row"] & {
+  valor_pago?: number;
+  data_prevista?: string | null;
+};
+export type FinDebtInsert = Database["public"]["Tables"]["fin_debts"]["Insert"] & {
+  valor_pago?: number;
+  data_prevista?: string | null;
+};
+export type FinDebtUpdate = Database["public"]["Tables"]["fin_debts"]["Update"] & {
+  valor_pago?: number;
+  data_prevista?: string | null;
+};
 
 export type Direcao = "devo" | "devem";
 
@@ -19,7 +28,7 @@ export async function listDebts(): Promise<FinDebt[]> {
     .order("pago", { ascending: true })
     .order("data", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as FinDebt[];
 }
 
 export async function createDebt(input: Omit<FinDebtInsert, "owner_id">) {
@@ -51,6 +60,22 @@ export async function deleteDebt(id: string) {
   if (error) throw error;
 }
 
-export async function togglePago(id: string, pago: boolean) {
-  return updateDebt(id, { pago, data_pago: pago ? new Date().toISOString().slice(0, 10) : null });
+export async function togglePago(id: string, pago: boolean, valorTotal?: number) {
+  const patch: FinDebtUpdate = {
+    pago,
+    data_pago: pago ? new Date().toISOString().slice(0, 10) : null,
+  };
+  if (pago && typeof valorTotal === "number") patch.valor_pago = valorTotal;
+  if (!pago) patch.valor_pago = 0;
+  return updateDebt(id, patch);
+}
+
+export async function addPartialPayment(d: FinDebt, amount: number) {
+  const novoPago = Math.min(Number(d.valor), Number(d.valor_pago ?? 0) + amount);
+  const totalPago = novoPago >= Number(d.valor);
+  return updateDebt(d.id, {
+    valor_pago: novoPago,
+    pago: totalPago,
+    data_pago: totalPago ? new Date().toISOString().slice(0, 10) : null,
+  });
 }

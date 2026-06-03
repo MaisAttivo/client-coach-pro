@@ -77,17 +77,17 @@ function DashboardPage() {
           Saldo do mês
         </p>
         <p
-          className={`font-display text-4xl mt-1 ${data.saldo >= 0 ? "text-primary" : "text-destructive"}`}
+          className={`font-display text-4xl mt-1 privacy-blur ${data.saldo >= 0 ? "text-primary" : "text-destructive"}`}
         >
           {data.saldo >= 0 ? "+" : ""}
           {fmtEUR(data.saldo)}
         </p>
         <div className="flex gap-4 mt-3 text-xs">
-          <span className="text-muted-foreground">
+          <span className="text-muted-foreground privacy-blur">
             <TrendingUp className="w-3 h-3 inline mr-1 text-[var(--color-success,#5a8a5a)]" />
             {fmtEUR(data.receitas.total)}
           </span>
-          <span className="text-muted-foreground">
+          <span className="text-muted-foreground privacy-blur">
             <TrendingDown className="w-3 h-3 inline mr-1 text-destructive" />
             {fmtEUR(data.despesas.total)}
           </span>
@@ -269,8 +269,8 @@ function StatCard({
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
         <Icon className={`w-3 h-3 ${colorClass}`} /> {label}
       </div>
-      <p className={`font-display text-xl mt-1 ${colorClass}`}>{fmtEURcompact(value)}</p>
-      {sub && <p className="text-[10px] text-muted-foreground mt-1 truncate">{sub}</p>}
+      <p className={`font-display text-xl mt-1 privacy-blur ${colorClass}`}>{fmtEURcompact(value)}</p>
+      {sub && <p className="text-[10px] text-muted-foreground mt-1 truncate privacy-blur">{sub}</p>}
     </Card>
   );
 }

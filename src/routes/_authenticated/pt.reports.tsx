@@ -207,10 +207,10 @@ function ReportsPage() {
           <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground font-medium">
             Receita total
           </p>
-          <p className="font-display text-5xl mt-3 text-foreground font-semibold tracking-tight">
+          <p className="font-display text-5xl mt-3 text-foreground font-semibold tracking-tight privacy-blur">
             {fmtEUR(receitaTotal)}
           </p>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-2 privacy-blur">
             {payments.length} pagamentos · média {fmtEUR(mediaReceitaMes)}/mês
           </p>
         </div>
@@ -224,8 +224,8 @@ function ReportsPage() {
         <Stat icon={UserMinus} value={saidasMes} label={`Saídas · ${ymLabel(selectedMonth)}`} tone={saidasMes > 0 ? "danger" : "default"} />
         <Stat icon={Dumbbell} value={treinos12m} label="Treinos · 12m" />
         <Stat icon={CreditCard} value={payments.length} label="Pagamentos" />
-        <Stat icon={Wallet} value={fmtEUR(ticketMedio)} label="Ticket médio" small />
-        <Stat icon={TrendingUp} value={fmtEUR(previstoMes)} label="Previsto mês" small />
+        <Stat icon={Wallet} value={fmtEUR(ticketMedio)} label="Ticket médio" small blur />
+        <Stat icon={TrendingUp} value={fmtEUR(previstoMes)} label="Previsto mês" small blur />
       </div>
 
       {/* Receita por mês */}
@@ -233,7 +233,7 @@ function ReportsPage() {
         <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground font-medium mb-1">
           Receita · últimos 12 meses
         </p>
-        <p className="font-display text-2xl font-semibold mb-4">{fmtEUR(receita12m)}</p>
+        <p className="font-display text-2xl font-semibold mb-4 privacy-blur">{fmtEUR(receita12m)}</p>
         <div className="h-44 -mx-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={byMonth} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
@@ -396,13 +396,14 @@ function Row({ label, value, icon: Icon }: { label: string; value: string; icon?
 }
 
 function Stat({
-  icon: Icon, value, label, tone = "default", small = false,
+  icon: Icon, value, label, tone = "default", small = false, blur = false,
 }: {
   icon: typeof Users;
   value: number | string;
   label: string;
   tone?: "default" | "danger";
   small?: boolean;
+  blur?: boolean;
 }) {
   return (
     <Card className="p-4 bg-surface border-border">
@@ -410,7 +411,7 @@ function Stat({
         className={`w-3.5 h-3.5 mb-3 ${tone === "danger" ? "text-destructive" : "text-primary"}`}
         strokeWidth={1.8}
       />
-      <p className={`font-display ${small ? "text-xl" : "text-3xl"} leading-none font-semibold tracking-tight`}>
+      <p className={`font-display ${small ? "text-xl" : "text-3xl"} leading-none font-semibold tracking-tight ${blur ? "privacy-blur" : ""}`}>
         {value}
       </p>
       <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1.5">{label}</p>

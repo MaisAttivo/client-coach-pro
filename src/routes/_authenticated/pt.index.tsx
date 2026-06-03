@@ -77,7 +77,7 @@ function DashboardPage() {
             {mesNome(now)}
           </p>
           <div className="flex items-baseline gap-2 mt-3">
-            <span className="font-display text-5xl text-foreground font-semibold tracking-tight">{fmtEUR(recebido)}</span>
+            <span className="font-display text-5xl text-foreground font-semibold tracking-tight privacy-blur">{fmtEUR(recebido)}</span>
           </div>
           <div className="mt-4 h-1 w-full rounded-full bg-muted overflow-hidden">
             <div
@@ -86,8 +86,8 @@ function DashboardPage() {
             />
           </div>
           <div className="flex items-center justify-between mt-2.5 text-[11px] text-muted-foreground">
-            <span>{ativos.length - emFalta.length}/{ativos.length} pagos · {fmtEUR(previstoMes)}</span>
-            {falta > 0 && <span className="text-destructive font-medium">−{fmtEUR(falta)}</span>}
+            <span className="privacy-blur">{ativos.length - emFalta.length}/{ativos.length} pagos · {fmtEUR(previstoMes)}</span>
+            {falta > 0 && <span className="text-destructive font-medium privacy-blur">−{fmtEUR(falta)}</span>}
           </div>
         </div>
       </Card>
@@ -101,9 +101,9 @@ function DashboardPage() {
                 <TrendingUp className="w-3 h-3 text-primary" />
                 Previsão · {mesNome(proxMes).split(" ")[0]}
               </p>
-              <p className="font-display text-3xl mt-2 text-foreground font-semibold">{fmtEUR(previstoProx)}</p>
+              <p className="font-display text-3xl mt-2 text-foreground font-semibold privacy-blur">{fmtEUR(previstoProx)}</p>
               {vaiParar.length > 0 && (
-                <p className="text-xs text-destructive mt-1.5">
+                <p className="text-xs text-destructive mt-1.5 privacy-blur">
                   −{fmtEUR(vaiParar.reduce((s, c) => s + valorAPagar(c), 0))} · {vaiParar.length} a sair
                 </p>
               )}

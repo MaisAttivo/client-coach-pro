@@ -78,8 +78,8 @@ function FixasPage() {
         <p className="text-[11px] uppercase tracking-widest text-accent-foreground/70 font-semibold">
           Compromisso mensal
         </p>
-        <p className="font-display text-4xl text-primary mt-1">{fmtEUR(totalMensal)}</p>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="font-display text-4xl text-primary mt-1 privacy-blur">{fmtEUR(totalMensal)}</p>
+        <p className="text-xs text-muted-foreground mt-2 privacy-blur">
           Inclui {fmtEUR(totalProvisoes)} de provisões anuais
         </p>
       </Card>

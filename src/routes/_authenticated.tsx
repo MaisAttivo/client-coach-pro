@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { PrivacyProvider, PrivacyToggle } from "@/lib/privacy";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -18,5 +19,10 @@ function AuthenticatedLayout() {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  return <Outlet />;
+  return (
+    <PrivacyProvider>
+      <PrivacyToggle />
+      <Outlet />
+    </PrivacyProvider>
+  );
 }

@@ -76,7 +76,7 @@ function VariaveisPage() {
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
             Receitas
           </p>
-          <p className="font-display text-xl text-[var(--color-success,#5a8a5a)] mt-1">
+          <p className="font-display text-xl text-[var(--color-success,#5a8a5a)] mt-1 privacy-blur">
             {fmtEUR(totalReceitas)}
           </p>
         </Card>
@@ -84,7 +84,7 @@ function VariaveisPage() {
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
             Despesas
           </p>
-          <p className="font-display text-xl text-destructive mt-1">{fmtEUR(totalDespesas)}</p>
+          <p className="font-display text-xl text-destructive mt-1 privacy-blur">{fmtEUR(totalDespesas)}</p>
         </Card>
       </div>
 

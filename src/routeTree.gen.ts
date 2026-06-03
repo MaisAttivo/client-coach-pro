@@ -21,6 +21,7 @@ import { Route as AuthenticatedPtReportsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
 import { Route as AuthenticatedPtClientsRouteImport } from './routes/_authenticated/pt.clients'
 import { Route as AuthenticatedFinancasVariaveisRouteImport } from './routes/_authenticated/financas.variaveis'
+import { Route as AuthenticatedFinancasFixasRouteImport } from './routes/_authenticated/financas.fixas'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -84,12 +85,19 @@ const AuthenticatedFinancasVariaveisRoute =
     path: '/variaveis',
     getParentRoute: () => AuthenticatedFinancasRoute,
   } as any)
+const AuthenticatedFinancasFixasRoute =
+  AuthenticatedFinancasFixasRouteImport.update({
+    id: '/fixas',
+    path: '/fixas',
+    getParentRoute: () => AuthenticatedFinancasRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/financas': typeof AuthenticatedFinancasRouteWithChildren
   '/pt': typeof AuthenticatedPtRouteWithChildren
+  '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -101,6 +109,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof AuthenticatedIndexRoute
+  '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -116,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated/financas': typeof AuthenticatedFinancasRouteWithChildren
   '/_authenticated/pt': typeof AuthenticatedPtRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/_authenticated/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
   '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/financas'
     | '/pt'
+    | '/financas/fixas'
     | '/financas/variaveis'
     | '/pt/clients'
     | '/pt/payments'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/'
+    | '/financas/fixas'
     | '/financas/variaveis'
     | '/pt/clients'
     | '/pt/payments'
@@ -156,6 +168,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financas'
     | '/_authenticated/pt'
     | '/_authenticated/'
+    | '/_authenticated/financas/fixas'
     | '/_authenticated/financas/variaveis'
     | '/_authenticated/pt/clients'
     | '/_authenticated/pt/payments'
@@ -256,15 +269,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinancasVariaveisRouteImport
       parentRoute: typeof AuthenticatedFinancasRoute
     }
+    '/_authenticated/financas/fixas': {
+      id: '/_authenticated/financas/fixas'
+      path: '/fixas'
+      fullPath: '/financas/fixas'
+      preLoaderRoute: typeof AuthenticatedFinancasFixasRouteImport
+      parentRoute: typeof AuthenticatedFinancasRoute
+    }
   }
 }
 
 interface AuthenticatedFinancasRouteChildren {
+  AuthenticatedFinancasFixasRoute: typeof AuthenticatedFinancasFixasRoute
   AuthenticatedFinancasVariaveisRoute: typeof AuthenticatedFinancasVariaveisRoute
   AuthenticatedFinancasIndexRoute: typeof AuthenticatedFinancasIndexRoute
 }
 
 const AuthenticatedFinancasRouteChildren: AuthenticatedFinancasRouteChildren = {
+  AuthenticatedFinancasFixasRoute: AuthenticatedFinancasFixasRoute,
   AuthenticatedFinancasVariaveisRoute: AuthenticatedFinancasVariaveisRoute,
   AuthenticatedFinancasIndexRoute: AuthenticatedFinancasIndexRoute,
 }
@@ -317,3 +339,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

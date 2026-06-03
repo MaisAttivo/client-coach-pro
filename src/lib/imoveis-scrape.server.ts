@@ -217,38 +217,45 @@ async function scrapeIdealista(cfg: Config): Promise<ScraperResult> {
 // --- OLX ---
 async function scrapeOlx(cfg: Config): Promise<ScraperResult> {
   const out: ScrapedListing[] = [];
-  const zona = zonaSlug(cfg.zona);
+  const zonas = zonaTerms(cfg.zona);
   let lastError: number | string | undefined;
-  for (const tipo of tipoSlugFromConfig(cfg.tipo, "olx")) {
-    const params = new URLSearchParams();
-    if (cfg.preco_min) params.set("search[filter_float_price:from]", String(cfg.preco_min));
-    if (cfg.preco_max) params.set("search[filter_float_price:to]", String(cfg.preco_max));
-    const base = `https://www.olx.pt/imoveis/${tipo}/venda/${zona ? zona + "/" : ""}`;
-    const url = `${base}?${params.toString()}`;
-    const r = await fetchHtml(url, "https://www.olx.pt/");
-    if (!r.ok) {
-      lastError = r.status;
-      continue;
-    }
-    const html = r.html;
-    const cardRe = /<div[^>]*data-cy="l-card"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
-    const matches = html.match(cardRe) ?? [];
-    for (const block of matches.slice(0, 30)) {
-      const hrefM = block.match(/href="(\/d\/anuncio\/[^"]+)"/);
-      if (!hrefM) continue;
-      const titleM = block.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/);
-      const priceM = block.match(/([\d\s.]+)\s*€/);
-      const locM = block.match(/data-testid="location-date"[^>]*>([\s\S]*?)</);
-      out.push({
-        titulo: titleM ? titleM[1].replace(/<[^>]+>/g, "").trim() : "OLX",
-        preco: parseNumber(priceM?.[1]),
-        localizacao: locM ? locM[1].replace(/<[^>]+>/g, "").trim() : cfg.zona,
-        area: null,
-        quartos: null,
-        tipo,
-        portal: "olx",
-        url: `https://www.olx.pt${hrefM[1]}`,
-      });
+  const tipos = cfg.tipo === "moradia" ? ["moradia"] : cfg.tipo === "apartamento" ? ["apartamento"] : ["apartamento", "moradia"];
+  for (const tipo of tipos) {
+    for (const zona of zonas) {
+      const params = new URLSearchParams();
+      if (cfg.preco_min) params.set("search[filter_float_price:from]", String(cfg.preco_min));
+      if (cfg.preco_max) params.set("search[filter_float_price:to]", String(cfg.preco_max));
+      const queryPath = zona ? `q-${zona}/` : "";
+      const url = `https://www.olx.pt/imoveis/apartamento-casa-a-venda/${queryPath}?${params.toString()}`;
+      const r = await fetchHtml(url, "https://www.olx.pt/");
+      if (!r.ok) {
+        if (r.status !== 404) lastError = r.status;
+        continue;
+      }
+      const html = r.html;
+      const cardRe = /<div[^>]*data-cy="l-card"[\s\S]*?(?=<div[^>]*data-cy="l-card"|<\/body>)/g;
+      const matches = html.match(cardRe) ?? [];
+      for (const block of matches.slice(0, 30)) {
+        const hrefM = block.match(/href="(\/d\/anuncio\/[^"]+)"/);
+        if (!hrefM) continue;
+        const titleM = block.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/) || block.match(/alt="([^"]+)"/);
+        const title = cleanText(titleM?.[1]) || "OLX";
+        if (tipo === "apartamento" && /\bmoradia\b/i.test(title)) continue;
+        if (tipo === "moradia" && !/\bmoradia\b/i.test(title)) continue;
+        const priceM = block.match(/data-testid="ad-price"[^>]*>([\s\S]*?)€/) || block.match(/([\d\s.]+)\s*€/);
+        const locM = block.match(/data-testid="location-date"[^>]*>([\s\S]*?)<\/p>/);
+        const roomsM = title.match(/\bT(\d)\b/i);
+        out.push({
+          titulo: title,
+          preco: parseNumber(priceM?.[1]),
+          localizacao: cleanText(locM?.[1]).split(" - ")[0] || cfg.zona,
+          area: null,
+          quartos: roomsM ? parseInt(roomsM[1], 10) : null,
+          tipo,
+          portal: "olx",
+          url: `https://www.olx.pt${hrefM[1]}`,
+        });
+      }
     }
   }
   return out.length === 0 && lastError !== undefined ? { listings: out, error: lastError } : { listings: out };

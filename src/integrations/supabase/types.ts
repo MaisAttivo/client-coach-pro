@@ -163,6 +163,7 @@ export type Database = {
           created_at: string
           data: string
           data_pago: string | null
+          data_prevista: string | null
           descricao: string | null
           direcao: string
           id: string
@@ -172,11 +173,13 @@ export type Database = {
           pessoa: string
           updated_at: string
           valor: number
+          valor_pago: number
         }
         Insert: {
           created_at?: string
           data?: string
           data_pago?: string | null
+          data_prevista?: string | null
           descricao?: string | null
           direcao: string
           id?: string
@@ -186,11 +189,13 @@ export type Database = {
           pessoa: string
           updated_at?: string
           valor?: number
+          valor_pago?: number
         }
         Update: {
           created_at?: string
           data?: string
           data_pago?: string | null
+          data_prevista?: string | null
           descricao?: string | null
           direcao?: string
           id?: string
@@ -200,6 +205,7 @@ export type Database = {
           pessoa?: string
           updated_at?: string
           valor?: number
+          valor_pago?: number
         }
         Relationships: []
       }

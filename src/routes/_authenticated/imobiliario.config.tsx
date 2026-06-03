@@ -26,6 +26,8 @@ function ImoConfig() {
   const [precoMax, setPrecoMax] = useState("");
   const [quartosMin, setQuartosMin] = useState("");
   const [zona, setZona] = useState("");
+  const [diasRecentes, setDiasRecentes] = useState("7");
+  const [esconderVistos, setEsconderVistos] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -36,6 +38,8 @@ function ImoConfig() {
       setPrecoMax(cfgQ.data.preco_max?.toString() ?? "");
       setQuartosMin(cfgQ.data.quartos_min?.toString() ?? "");
       setZona(cfgQ.data.zona ?? "");
+      setDiasRecentes(cfgQ.data.dias_recentes?.toString() ?? "7");
+      setEsconderVistos(cfgQ.data.esconder_vistos ?? false);
     }
   }, [cfgQ.data]);
 

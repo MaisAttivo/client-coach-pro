@@ -62,6 +62,8 @@ function ImoConfig() {
         preco_max: precoMax ? Number(precoMax) : null,
         quartos_min: quartosMin ? Number(quartosMin) : null,
         zona: zona.trim() || null,
+        dias_recentes: Math.max(1, Number(diasRecentes) || 7),
+        esconder_vistos: esconderVistos,
       });
       await qc.invalidateQueries({ queryKey: ["imo"] });
       toast.success("Configuração guardada");

@@ -358,7 +358,10 @@ export async function scrapeForOwner(
     }
   }
 
+  const seenUrls = new Set<string>();
   const filtered = results.filter((r) => {
+    if (seenUrls.has(r.url)) return false;
+    seenUrls.add(r.url);
     if (cfg.preco_min && r.preco != null && r.preco < cfg.preco_min) return false;
     if (cfg.preco_max && r.preco != null && r.preco > cfg.preco_max) return false;
     if (cfg.quartos_min && r.quartos != null && r.quartos < cfg.quartos_min) return false;

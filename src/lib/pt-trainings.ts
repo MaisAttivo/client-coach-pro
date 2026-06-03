@@ -51,6 +51,15 @@ export async function listTrainingsByMonth(ym: string): Promise<PtTraining[]> {
   return data ?? [];
 }
 
+export async function listAllTrainings(): Promise<PtTraining[]> {
+  const { data, error } = await supabase
+    .from("pt_trainings")
+    .select("*")
+    .order("data", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function createTraining(input: Omit<PtTrainingInsert, "owner_id">) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;

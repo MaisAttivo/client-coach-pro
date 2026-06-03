@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPtRouteImport } from './routes/_authenticated/pt'
 import { Route as AuthenticatedPtIndexRouteImport } from './routes/_authenticated/pt.index'
 import { Route as AuthenticatedPtTrainingsRouteImport } from './routes/_authenticated/pt.trainings'
+import { Route as AuthenticatedPtReportsRouteImport } from './routes/_authenticated/pt.reports'
 import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
 import { Route as AuthenticatedPtClientsRouteImport } from './routes/_authenticated/pt.clients'
 
@@ -48,6 +49,11 @@ const AuthenticatedPtTrainingsRoute =
     path: '/trainings',
     getParentRoute: () => AuthenticatedPtRoute,
   } as any)
+const AuthenticatedPtReportsRoute = AuthenticatedPtReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedPtRoute,
+} as any)
 const AuthenticatedPtPaymentsRoute = AuthenticatedPtPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/pt': typeof AuthenticatedPtRouteWithChildren
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
+  '/pt/reports': typeof AuthenticatedPtReportsRoute
   '/pt/trainings': typeof AuthenticatedPtTrainingsRoute
   '/pt/': typeof AuthenticatedPtIndexRoute
 }
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
+  '/pt/reports': typeof AuthenticatedPtReportsRoute
   '/pt/trainings': typeof AuthenticatedPtTrainingsRoute
   '/pt': typeof AuthenticatedPtIndexRoute
 }
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
   '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
+  '/_authenticated/pt/reports': typeof AuthenticatedPtReportsRoute
   '/_authenticated/pt/trainings': typeof AuthenticatedPtTrainingsRoute
   '/_authenticated/pt/': typeof AuthenticatedPtIndexRoute
 }
@@ -95,10 +104,18 @@ export interface FileRouteTypes {
     | '/pt'
     | '/pt/clients'
     | '/pt/payments'
+    | '/pt/reports'
     | '/pt/trainings'
     | '/pt/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/pt/clients' | '/pt/payments' | '/pt/trainings' | '/pt'
+  to:
+    | '/login'
+    | '/'
+    | '/pt/clients'
+    | '/pt/payments'
+    | '/pt/reports'
+    | '/pt/trainings'
+    | '/pt'
   id:
     | '__root__'
     | '/_authenticated'
@@ -107,6 +124,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/pt/clients'
     | '/_authenticated/pt/payments'
+    | '/_authenticated/pt/reports'
     | '/_authenticated/pt/trainings'
     | '/_authenticated/pt/'
   fileRoutesById: FileRoutesById
@@ -160,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPtTrainingsRouteImport
       parentRoute: typeof AuthenticatedPtRoute
     }
+    '/_authenticated/pt/reports': {
+      id: '/_authenticated/pt/reports'
+      path: '/reports'
+      fullPath: '/pt/reports'
+      preLoaderRoute: typeof AuthenticatedPtReportsRouteImport
+      parentRoute: typeof AuthenticatedPtRoute
+    }
     '/_authenticated/pt/payments': {
       id: '/_authenticated/pt/payments'
       path: '/payments'
@@ -180,6 +205,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedPtRouteChildren {
   AuthenticatedPtClientsRoute: typeof AuthenticatedPtClientsRoute
   AuthenticatedPtPaymentsRoute: typeof AuthenticatedPtPaymentsRoute
+  AuthenticatedPtReportsRoute: typeof AuthenticatedPtReportsRoute
   AuthenticatedPtTrainingsRoute: typeof AuthenticatedPtTrainingsRoute
   AuthenticatedPtIndexRoute: typeof AuthenticatedPtIndexRoute
 }
@@ -187,6 +213,7 @@ interface AuthenticatedPtRouteChildren {
 const AuthenticatedPtRouteChildren: AuthenticatedPtRouteChildren = {
   AuthenticatedPtClientsRoute: AuthenticatedPtClientsRoute,
   AuthenticatedPtPaymentsRoute: AuthenticatedPtPaymentsRoute,
+  AuthenticatedPtReportsRoute: AuthenticatedPtReportsRoute,
   AuthenticatedPtTrainingsRoute: AuthenticatedPtTrainingsRoute,
   AuthenticatedPtIndexRoute: AuthenticatedPtIndexRoute,
 }

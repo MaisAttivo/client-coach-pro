@@ -220,8 +220,8 @@ function ReportsPage() {
       <div className="grid grid-cols-2 gap-2.5">
         <Stat icon={Users} value={clients.length} label="Clientes totais" />
         <Stat icon={Activity} value={ativos.length} label="Ativos" />
-        <Stat icon={UserPlus} value={novosMes} label="Novos · este mês" />
-        <Stat icon={UserMinus} value={saidasMes} label="Saídas · este mês" tone={saidasMes > 0 ? "danger" : "default"} />
+        <Stat icon={UserPlus} value={novosMes} label={`Novos · ${ymLabel(selectedMonth)}`} />
+        <Stat icon={UserMinus} value={saidasMes} label={`Saídas · ${ymLabel(selectedMonth)}`} tone={saidasMes > 0 ? "danger" : "default"} />
         <Stat icon={Dumbbell} value={treinos12m} label="Treinos · 12m" />
         <Stat icon={CreditCard} value={payments.length} label="Pagamentos" />
         <Stat icon={Wallet} value={fmtEUR(ticketMedio)} label="Ticket médio" small />

@@ -13,9 +13,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedPtRouteImport } from './routes/_authenticated/pt'
+import { Route as AuthenticatedJogosRouteImport } from './routes/_authenticated/jogos'
 import { Route as AuthenticatedImobiliarioRouteImport } from './routes/_authenticated/imobiliario'
 import { Route as AuthenticatedFinancasRouteImport } from './routes/_authenticated/financas'
 import { Route as AuthenticatedPtIndexRouteImport } from './routes/_authenticated/pt.index'
+import { Route as AuthenticatedJogosIndexRouteImport } from './routes/_authenticated/jogos.index'
 import { Route as AuthenticatedImobiliarioIndexRouteImport } from './routes/_authenticated/imobiliario.index'
 import { Route as AuthenticatedFinancasIndexRouteImport } from './routes/_authenticated/financas.index'
 import { Route as ApiPublicImoveisScrapeRouteImport } from './routes/api/public/imoveis-scrape'
@@ -23,6 +25,7 @@ import { Route as AuthenticatedPtTrainingsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPtReportsRouteImport } from './routes/_authenticated/pt.reports'
 import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
 import { Route as AuthenticatedPtClientsRouteImport } from './routes/_authenticated/pt.clients'
+import { Route as AuthenticatedJogosQuickstopRouteImport } from './routes/_authenticated/jogos.quickstop'
 import { Route as AuthenticatedImobiliarioConfigRouteImport } from './routes/_authenticated/imobiliario.config'
 import { Route as AuthenticatedFinancasVariaveisRouteImport } from './routes/_authenticated/financas.variaveis'
 import { Route as AuthenticatedFinancasFixasRouteImport } from './routes/_authenticated/financas.fixas'
@@ -49,6 +52,11 @@ const AuthenticatedPtRoute = AuthenticatedPtRouteImport.update({
   path: '/pt',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedJogosRoute = AuthenticatedJogosRouteImport.update({
+  id: '/jogos',
+  path: '/jogos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedImobiliarioRoute =
   AuthenticatedImobiliarioRouteImport.update({
     id: '/imobiliario',
@@ -64,6 +72,11 @@ const AuthenticatedPtIndexRoute = AuthenticatedPtIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedPtRoute,
+} as any)
+const AuthenticatedJogosIndexRoute = AuthenticatedJogosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedJogosRoute,
 } as any)
 const AuthenticatedImobiliarioIndexRoute =
   AuthenticatedImobiliarioIndexRouteImport.update({
@@ -103,6 +116,12 @@ const AuthenticatedPtClientsRoute = AuthenticatedPtClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => AuthenticatedPtRoute,
 } as any)
+const AuthenticatedJogosQuickstopRoute =
+  AuthenticatedJogosQuickstopRouteImport.update({
+    id: '/quickstop',
+    path: '/quickstop',
+    getParentRoute: () => AuthenticatedJogosRoute,
+  } as any)
 const AuthenticatedImobiliarioConfigRoute =
   AuthenticatedImobiliarioConfigRouteImport.update({
     id: '/config',
@@ -145,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/financas': typeof AuthenticatedFinancasRouteWithChildren
   '/imobiliario': typeof AuthenticatedImobiliarioRouteWithChildren
+  '/jogos': typeof AuthenticatedJogosRouteWithChildren
   '/pt': typeof AuthenticatedPtRouteWithChildren
   '/financas/categorias': typeof AuthenticatedFinancasCategoriasRoute
   '/financas/creditos': typeof AuthenticatedFinancasCreditosRoute
@@ -152,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
+  '/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
   '/pt/reports': typeof AuthenticatedPtReportsRoute
@@ -159,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/api/public/imoveis-scrape': typeof ApiPublicImoveisScrapeRoute
   '/financas/': typeof AuthenticatedFinancasIndexRoute
   '/imobiliario/': typeof AuthenticatedImobiliarioIndexRoute
+  '/jogos/': typeof AuthenticatedJogosIndexRoute
   '/pt/': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,6 +192,7 @@ export interface FileRoutesByTo {
   '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
+  '/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
   '/pt/reports': typeof AuthenticatedPtReportsRoute
@@ -177,6 +200,7 @@ export interface FileRoutesByTo {
   '/api/public/imoveis-scrape': typeof ApiPublicImoveisScrapeRoute
   '/financas': typeof AuthenticatedFinancasIndexRoute
   '/imobiliario': typeof AuthenticatedImobiliarioIndexRoute
+  '/jogos': typeof AuthenticatedJogosIndexRoute
   '/pt': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRoutesById {
@@ -185,6 +209,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/financas': typeof AuthenticatedFinancasRouteWithChildren
   '/_authenticated/imobiliario': typeof AuthenticatedImobiliarioRouteWithChildren
+  '/_authenticated/jogos': typeof AuthenticatedJogosRouteWithChildren
   '/_authenticated/pt': typeof AuthenticatedPtRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/financas/categorias': typeof AuthenticatedFinancasCategoriasRoute
@@ -193,6 +218,7 @@ export interface FileRoutesById {
   '/_authenticated/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/_authenticated/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/_authenticated/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
+  '/_authenticated/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
   '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
   '/_authenticated/pt/reports': typeof AuthenticatedPtReportsRoute
@@ -200,6 +226,7 @@ export interface FileRoutesById {
   '/api/public/imoveis-scrape': typeof ApiPublicImoveisScrapeRoute
   '/_authenticated/financas/': typeof AuthenticatedFinancasIndexRoute
   '/_authenticated/imobiliario/': typeof AuthenticatedImobiliarioIndexRoute
+  '/_authenticated/jogos/': typeof AuthenticatedJogosIndexRoute
   '/_authenticated/pt/': typeof AuthenticatedPtIndexRoute
 }
 export interface FileRouteTypes {
@@ -209,6 +236,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/financas'
     | '/imobiliario'
+    | '/jogos'
     | '/pt'
     | '/financas/categorias'
     | '/financas/creditos'
@@ -216,6 +244,7 @@ export interface FileRouteTypes {
     | '/financas/fixas'
     | '/financas/variaveis'
     | '/imobiliario/config'
+    | '/jogos/quickstop'
     | '/pt/clients'
     | '/pt/payments'
     | '/pt/reports'
@@ -223,6 +252,7 @@ export interface FileRouteTypes {
     | '/api/public/imoveis-scrape'
     | '/financas/'
     | '/imobiliario/'
+    | '/jogos/'
     | '/pt/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -234,6 +264,7 @@ export interface FileRouteTypes {
     | '/financas/fixas'
     | '/financas/variaveis'
     | '/imobiliario/config'
+    | '/jogos/quickstop'
     | '/pt/clients'
     | '/pt/payments'
     | '/pt/reports'
@@ -241,6 +272,7 @@ export interface FileRouteTypes {
     | '/api/public/imoveis-scrape'
     | '/financas'
     | '/imobiliario'
+    | '/jogos'
     | '/pt'
   id:
     | '__root__'
@@ -248,6 +280,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/financas'
     | '/_authenticated/imobiliario'
+    | '/_authenticated/jogos'
     | '/_authenticated/pt'
     | '/_authenticated/'
     | '/_authenticated/financas/categorias'
@@ -256,6 +289,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financas/fixas'
     | '/_authenticated/financas/variaveis'
     | '/_authenticated/imobiliario/config'
+    | '/_authenticated/jogos/quickstop'
     | '/_authenticated/pt/clients'
     | '/_authenticated/pt/payments'
     | '/_authenticated/pt/reports'
@@ -263,6 +297,7 @@ export interface FileRouteTypes {
     | '/api/public/imoveis-scrape'
     | '/_authenticated/financas/'
     | '/_authenticated/imobiliario/'
+    | '/_authenticated/jogos/'
     | '/_authenticated/pt/'
   fileRoutesById: FileRoutesById
 }
@@ -302,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPtRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/jogos': {
+      id: '/_authenticated/jogos'
+      path: '/jogos'
+      fullPath: '/jogos'
+      preLoaderRoute: typeof AuthenticatedJogosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/imobiliario': {
       id: '/_authenticated/imobiliario'
       path: '/imobiliario'
@@ -322,6 +364,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pt/'
       preLoaderRoute: typeof AuthenticatedPtIndexRouteImport
       parentRoute: typeof AuthenticatedPtRoute
+    }
+    '/_authenticated/jogos/': {
+      id: '/_authenticated/jogos/'
+      path: '/'
+      fullPath: '/jogos/'
+      preLoaderRoute: typeof AuthenticatedJogosIndexRouteImport
+      parentRoute: typeof AuthenticatedJogosRoute
     }
     '/_authenticated/imobiliario/': {
       id: '/_authenticated/imobiliario/'
@@ -371,6 +420,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pt/clients'
       preLoaderRoute: typeof AuthenticatedPtClientsRouteImport
       parentRoute: typeof AuthenticatedPtRoute
+    }
+    '/_authenticated/jogos/quickstop': {
+      id: '/_authenticated/jogos/quickstop'
+      path: '/quickstop'
+      fullPath: '/jogos/quickstop'
+      preLoaderRoute: typeof AuthenticatedJogosQuickstopRouteImport
+      parentRoute: typeof AuthenticatedJogosRoute
     }
     '/_authenticated/imobiliario/config': {
       id: '/_authenticated/imobiliario/config'
@@ -456,6 +512,19 @@ const AuthenticatedImobiliarioRouteWithChildren =
     AuthenticatedImobiliarioRouteChildren,
   )
 
+interface AuthenticatedJogosRouteChildren {
+  AuthenticatedJogosQuickstopRoute: typeof AuthenticatedJogosQuickstopRoute
+  AuthenticatedJogosIndexRoute: typeof AuthenticatedJogosIndexRoute
+}
+
+const AuthenticatedJogosRouteChildren: AuthenticatedJogosRouteChildren = {
+  AuthenticatedJogosQuickstopRoute: AuthenticatedJogosQuickstopRoute,
+  AuthenticatedJogosIndexRoute: AuthenticatedJogosIndexRoute,
+}
+
+const AuthenticatedJogosRouteWithChildren =
+  AuthenticatedJogosRoute._addFileChildren(AuthenticatedJogosRouteChildren)
+
 interface AuthenticatedPtRouteChildren {
   AuthenticatedPtClientsRoute: typeof AuthenticatedPtClientsRoute
   AuthenticatedPtPaymentsRoute: typeof AuthenticatedPtPaymentsRoute
@@ -479,6 +548,7 @@ const AuthenticatedPtRouteWithChildren = AuthenticatedPtRoute._addFileChildren(
 interface AuthenticatedRouteChildren {
   AuthenticatedFinancasRoute: typeof AuthenticatedFinancasRouteWithChildren
   AuthenticatedImobiliarioRoute: typeof AuthenticatedImobiliarioRouteWithChildren
+  AuthenticatedJogosRoute: typeof AuthenticatedJogosRouteWithChildren
   AuthenticatedPtRoute: typeof AuthenticatedPtRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -486,6 +556,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFinancasRoute: AuthenticatedFinancasRouteWithChildren,
   AuthenticatedImobiliarioRoute: AuthenticatedImobiliarioRouteWithChildren,
+  AuthenticatedJogosRoute: AuthenticatedJogosRouteWithChildren,
   AuthenticatedPtRoute: AuthenticatedPtRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }

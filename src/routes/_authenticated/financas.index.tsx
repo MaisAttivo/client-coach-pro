@@ -89,6 +89,22 @@ function DashboardPage() {
     .filter((c): c is NonNullable<typeof c> => !!c && c.pct >= 80)
     .sort((a, b) => b.pct - a.pct);
 
+  // Runway: saldo acumulado dos últimos 6 meses / despesa média
+  const saldoAcumulado = history.reduce((s, m) => s + m.saldo, 0);
+  const despesaMedia = avg(history.map((m) => m.despesas));
+  const runway = monthsRunway(saldoAcumulado, despesaMedia);
+
+  // Drill-down de categoria
+  const [drill, setDrill] = useState<{ id: string | null; nome: string; cor: string; total: number } | null>(null);
+  const drillTxs = drill
+    ? data.transactions.filter(
+        (t) => t.tipo === "despesa" && (t.categoria_id ?? null) === drill.id,
+      )
+    : [];
+  const drillFixas = drill
+    ? data.fixasAtivas.filter((f) => (f.categoria_id ?? null) === drill.id)
+    : [];
+
   return (
     <main className="px-5 pt-2 pb-6 space-y-4">
       <MonthNavigator value={mes} onChange={setMes} label={mesRefLabel(mes)} />

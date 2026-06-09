@@ -9,7 +9,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
 import {
-  Users, TrendingUp, Dumbbell, CreditCard, UserPlus, UserMinus, Gift, Trophy, Activity, Wallet, CalendarDays,
+  Users, TrendingUp, Dumbbell, CreditCard, UserPlus, UserMinus, Gift, Trophy, Activity, Wallet, CalendarDays, Filter, LogOut, Repeat,
 } from "lucide-react";
 import { listClients, fmtEUR, valorAPagar, type PtClient } from "@/lib/pt-clients";
 import { listAllPayments } from "@/lib/pt-payments";
@@ -169,6 +169,67 @@ function ReportsPage() {
   const retencao = ativos.length + antigos.length > 0
     ? (ativos.length / (ativos.length + antigos.length)) * 100
     : 0;
+
+  // ---------- MRR / Churn / LTV ----------
+  // MRR: receita recorrente mensal das mensalidades ativas
+  const mrr = ativos
+    .filter((c) => c.service_type === "mensalidade")
+    .reduce((s, c) => s + valorAPagar(c), 0);
+  const arr = mrr * 12;
+
+  // Churn mensal: saídas / (ativos no início do mês)
+  // aproximação: ativos atuais + saidasMes no mês selecionado
+  const baseMes = ativos.length + saidasMes;
+  const churnRate = baseMes > 0 ? (saidasMes / baseMes) * 100 : 0;
+
+  // LTV por cliente: receita total / nº clientes únicos com pagamentos
+  const clientesComPagamento = new Set(payments.map((p) => p.client_id));
+  const ltvMedia = clientesComPagamento.size > 0
+    ? receitaTotal / clientesComPagamento.size
+    : 0;
+
+  // Tempo médio de vida (meses) dos antigos
+  const tempoMedioMeses = (() => {
+    const durs: number[] = [];
+    for (const c of antigos) {
+      if (!c.mes_inicio || !c.updated_at) continue;
+      const [yi, mi] = c.mes_inicio.slice(0, 7).split("-").map(Number);
+      const fim = new Date(c.updated_at);
+      const meses =
+        (fim.getFullYear() - yi) * 12 + (fim.getMonth() + 1 - mi);
+      if (meses > 0) durs.push(meses);
+    }
+    if (!durs.length) return null;
+    return durs.reduce((s, n) => s + n, 0) / durs.length;
+  })();
+
+  // ---------- Funil prospect → cliente ----------
+  // ativos com mes_inicio nos últimos 3 meses (presumidamente vieram de prospect)
+  const tresMesesAtras = new Date();
+  tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+  const convertidos3m = clients.filter(
+    (c) => c.mes_inicio && new Date(c.mes_inicio) >= tresMesesAtras && c.status !== "prospect",
+  ).length;
+  const pipelineTotal = prospects.length + convertidos3m;
+  const conversao = pipelineTotal > 0 ? (convertidos3m / pipelineTotal) * 100 : 0;
+
+  // ---------- Motivos de saída ----------
+  const motivos = (() => {
+    const map = new Map<string, number>();
+    for (const c of antigos) {
+      const m = (c as unknown as { motivo_saida: string | null }).motivo_saida;
+      if (!m) continue;
+      const key = m.trim().toLowerCase().slice(0, 60);
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([motivo, n]) => ({ motivo, n }));
+  })();
+  const antigosSemMotivo = antigos.filter(
+    (c) => !(c as unknown as { motivo_saida: string | null }).motivo_saida,
+  ).length;
 
   if (l1 || l2 || l3) {
     return (
@@ -362,12 +423,78 @@ function ReportsPage() {
         </Card>
       </div>
 
+      {/* MRR / ARR / LTV */}
+      <Card className="p-4 bg-surface border-border">
+        <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <Repeat className="w-4 h-4 text-primary" /> Receita recorrente
+        </p>
+        <div className="grid grid-cols-2 gap-2.5 mb-3">
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">MRR</p>
+            <p className="font-display text-xl font-semibold privacy-blur">{fmtEUR(mrr)}</p>
+          </div>
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">ARR</p>
+            <p className="font-display text-xl font-semibold privacy-blur">{fmtEUR(arr)}</p>
+          </div>
+        </div>
+        <ul className="space-y-2 text-sm">
+          <Row label="LTV médio" value={fmtEUR(ltvMedia)} />
+          <Row label="Tempo médio de vida" value={tempoMedioMeses !== null ? `${tempoMedioMeses.toFixed(1)} meses` : "—"} />
+          <Row label="Churn mensal" value={`${churnRate.toFixed(1)}%`} icon={churnRate > 5 ? LogOut : undefined} />
+        </ul>
+      </Card>
+
+      {/* Funil prospect → cliente */}
+      <Card className="p-4 bg-surface border-border">
+        <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <Filter className="w-4 h-4 text-primary" /> Funil de conversão
+        </p>
+        <ul className="space-y-2 text-sm">
+          <Row label="Prospects no pipeline" value={String(prospects.length)} />
+          <Row label="Convertidos últimos 3 meses" value={String(convertidos3m)} />
+          <Row label="Taxa de conversão" value={`${conversao.toFixed(0)}%`} />
+        </ul>
+        {pipelineTotal > 0 && (
+          <div className="mt-3 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+            <div className="h-full bg-primary rounded-full" style={{ width: `${conversao}%` }} />
+          </div>
+        )}
+      </Card>
+
+      {/* Motivos de saída */}
+      {antigos.length > 0 && (
+        <Card className="p-4 bg-surface border-border">
+          <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+            <LogOut className="w-4 h-4 text-destructive" /> Motivos de saída
+          </p>
+          {motivos.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Ainda sem motivos registados. Adiciona ao suspender cliente.
+            </p>
+          ) : (
+            <ul className="space-y-1.5 text-sm">
+              {motivos.map((m) => (
+                <li key={m.motivo} className="flex justify-between items-center">
+                  <span className="capitalize truncate">{m.motivo}</span>
+                  <span className="font-mono text-xs text-muted-foreground shrink-0">{m.n}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {antigosSemMotivo > 0 && (
+            <p className="text-[10px] text-muted-foreground mt-3 pt-2 border-t border-border/40">
+              {antigosSemMotivo} antigo{antigosSemMotivo === 1 ? "" : "s"} sem motivo registado
+            </p>
+          )}
+        </Card>
+      )}
+
       {/* Saúde do negócio */}
       <Card className="p-4 bg-surface border-border">
         <p className="text-sm font-semibold text-foreground mb-3">Saúde do negócio</p>
         <ul className="space-y-2 text-sm">
           <Row label="Taxa de retenção" value={`${retencao.toFixed(0)}%`} />
-          <Row label="Prospects no pipeline" value={String(prospects.length)} />
           <Row label="Descontos ativos" value={fmtEUR(totalDescontos)} icon={Gift} />
           <Row label="Receita média / mês (12m)" value={fmtEUR(mediaReceitaMes)} />
           <Row label="Treinos médios / mês (12m)" value={mediaTreinosMes.toFixed(1)} />

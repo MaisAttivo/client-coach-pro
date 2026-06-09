@@ -41,6 +41,7 @@ interface FormState {
   forecast_notas: string;
   treinos_pagos: string;
   treinos_dados: string;
+  motivo_saida: string;
 }
 
 const empty = (status: ClientStatus = "ativo"): FormState => ({
@@ -61,6 +62,7 @@ const empty = (status: ClientStatus = "ativo"): FormState => ({
   forecast_notas: "",
   treinos_pagos: "0",
   treinos_dados: "0",
+  motivo_saida: "",
 });
 
 const num = (s: string) => (s.trim() === "" ? 0 : Number(s.replace(",", ".")));
@@ -89,6 +91,7 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
         forecast_notas: client.forecast_notas ?? "",
         treinos_pagos: String(client.treinos_pagos ?? 0),
         treinos_dados: String(client.treinos_dados ?? 0),
+        motivo_saida: (client as unknown as { motivo_saida: string | null }).motivo_saida ?? "",
       });
     } else {
       setForm(empty(defaultStatus));
@@ -134,6 +137,7 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
         forecast_notas: form.forecast_notas.trim() || null,
         treinos_pagos: Math.max(0, Math.trunc(num(form.treinos_pagos))),
         treinos_dados: Math.max(0, Math.trunc(num(form.treinos_dados))),
+        motivo_saida: form.status === "antigo" ? (form.motivo_saida.trim() || null) : null,
         // legacy fields kept to satisfy NOT NULL defaults
       };
       if (client) {
@@ -154,9 +158,13 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
 
   const handleSuspend = async () => {
     if (!client) return;
+    const motivo = window.prompt("Motivo de saída? (opcional)", "") ?? "";
     setSaving(true);
     try {
-      await updateClient(client.id, { status: "antigo" });
+      await updateClient(client.id, {
+        status: "antigo",
+        motivo_saida: motivo.trim() || null,
+      });
       toast.success("Cliente suspenso");
       onSaved();
       onOpenChange(false);
@@ -212,6 +220,14 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
               </SelectContent>
             </Select>
           </Field>
+
+          {form.status === "antigo" && (
+            <Field label="Motivo de saída">
+              <Textarea rows={2} value={form.motivo_saida}
+                onChange={(e) => set("motivo_saida", e.target.value)}
+                placeholder="Ex: financeiro, mudança de cidade, sem disponibilidade…" />
+            </Field>
+          )}
 
           <Field label="Nome">
             <Input value={form.nome} onChange={(e) => set("nome", e.target.value)} />

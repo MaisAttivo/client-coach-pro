@@ -2,14 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import {
-  TrendingUp, TrendingDown, Repeat, PiggyBank, Calendar, Target, Sparkles,
+  TrendingUp, TrendingDown, Repeat, PiggyBank, Calendar, Target, Sparkles, Wallet,
 } from "lucide-react";
 import { mesRef, mesRefLabel, shiftMes, fmtEUR, fmtEURcompact } from "@/lib/fin-shared";
 import { getMonthOverview } from "@/lib/fin-month";
 import { valorMensalEfetivo } from "@/lib/fin-fixed";
-import { deltaPct, projectToEndOfMonth, fmtDelta } from "@/lib/analytics-shared";
+import { deltaPct, projectToEndOfMonth, fmtDelta, monthsRunway, avg } from "@/lib/analytics-shared";
 import { Card } from "@/components/ui/card";
 import { MonthNavigator } from "@/components/MonthNavigator";
+import { CategoryDrillDownDialog } from "@/components/financas/CategoryDrillDownDialog";
 import { BarChart, Bar, Line, ComposedChart, XAxis, ResponsiveContainer, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/financas/")({
@@ -88,6 +89,22 @@ function DashboardPage() {
     .filter((c): c is NonNullable<typeof c> => !!c && c.pct >= 80)
     .sort((a, b) => b.pct - a.pct);
 
+  // Runway: saldo acumulado dos últimos 6 meses / despesa média
+  const saldoAcumulado = history.reduce((s, m) => s + m.saldo, 0);
+  const despesaMedia = avg(history.map((m) => m.despesas));
+  const runway = monthsRunway(saldoAcumulado, despesaMedia);
+
+  // Drill-down de categoria
+  const [drill, setDrill] = useState<{ id: string | null; nome: string; cor: string; total: number } | null>(null);
+  const drillTxs = drill
+    ? data.transactions.filter(
+        (t) => t.tipo === "despesa" && (t.categoria_id ?? null) === drill.id,
+      )
+    : [];
+  const drillFixas = drill
+    ? data.fixasAtivas.filter((f) => (f.categoria_id ?? null) === drill.id)
+    : [];
+
   return (
     <main className="px-5 pt-2 pb-6 space-y-4">
       <MonthNavigator value={mes} onChange={setMes} label={mesRefLabel(mes)} />
@@ -129,6 +146,28 @@ function DashboardPage() {
           </div>
         )}
       </Card>
+
+      {/* Runway / saldo acumulado */}
+      {history.length >= 3 && (
+        <Card className="p-4 bg-surface border-border">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+              <Wallet className="w-3 h-3 text-primary" /> Runway · 6 meses
+            </p>
+            {runway !== null && (
+              <span className={`font-mono text-xs ${runway >= 3 ? "text-[var(--color-success,#5a8a5a)]" : runway >= 1 ? "text-[var(--color-warning,#c9893a)]" : "text-destructive"}`}>
+                {runway.toFixed(1)} {runway === 1 ? "mês" : "meses"}
+              </span>
+            )}
+          </div>
+          <p className={`font-display text-2xl mt-1 privacy-blur ${saldoAcumulado >= 0 ? "text-primary" : "text-destructive"}`}>
+            {saldoAcumulado >= 0 ? "+" : ""}{fmtEUR(saldoAcumulado)}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-1 privacy-blur">
+            Saldo acumulado · despesa média {fmtEUR(despesaMedia)}/mês
+          </p>
+        </Card>
+      )}
 
       {/* Grid 2x2 */}
       <div className="grid grid-cols-2 gap-3">
@@ -253,18 +292,24 @@ function DashboardPage() {
               const widthPct = (c.total / maxCat) * 100;
               return (
                 <li key={c.id ?? c.nome}>
-                  <div className="flex justify-between items-baseline text-xs mb-1">
-                    <span className="font-medium">{c.nome}</span>
-                    <span className="text-muted-foreground font-mono privacy-blur">
-                      {fmtEUR(c.total)} · {pct.toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${widthPct}%`, background: c.cor }}
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDrill({ id: c.id, nome: c.nome, cor: c.cor, total: c.total })}
+                    className="w-full text-left hover:opacity-80 transition-opacity"
+                  >
+                    <div className="flex justify-between items-baseline text-xs mb-1">
+                      <span className="font-medium">{c.nome}</span>
+                      <span className="text-muted-foreground font-mono privacy-blur">
+                        {fmtEUR(c.total)} · {pct.toFixed(0)}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${widthPct}%`, background: c.cor }}
+                      />
+                    </div>
+                  </button>
                 </li>
               );
             })}
@@ -322,6 +367,18 @@ function DashboardPage() {
             ))}
           </ul>
         </Card>
+      )}
+
+      {drill && (
+        <CategoryDrillDownDialog
+          open={!!drill}
+          onOpenChange={(v) => !v && setDrill(null)}
+          categoryName={drill.nome}
+          categoryColor={drill.cor}
+          total={drill.total}
+          transactions={drillTxs}
+          fixas={drillFixas}
+        />
       )}
     </main>
   );

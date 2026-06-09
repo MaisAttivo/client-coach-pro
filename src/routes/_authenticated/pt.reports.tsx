@@ -170,6 +170,67 @@ function ReportsPage() {
     ? (ativos.length / (ativos.length + antigos.length)) * 100
     : 0;
 
+  // ---------- MRR / Churn / LTV ----------
+  // MRR: receita recorrente mensal das mensalidades ativas
+  const mrr = ativos
+    .filter((c) => c.service_type === "mensalidade")
+    .reduce((s, c) => s + valorAPagar(c), 0);
+  const arr = mrr * 12;
+
+  // Churn mensal: saídas / (ativos no início do mês)
+  // aproximação: ativos atuais + saidasMes no mês selecionado
+  const baseMes = ativos.length + saidasMes;
+  const churnRate = baseMes > 0 ? (saidasMes / baseMes) * 100 : 0;
+
+  // LTV por cliente: receita total / nº clientes únicos com pagamentos
+  const clientesComPagamento = new Set(payments.map((p) => p.client_id));
+  const ltvMedia = clientesComPagamento.size > 0
+    ? receitaTotal / clientesComPagamento.size
+    : 0;
+
+  // Tempo médio de vida (meses) dos antigos
+  const tempoMedioMeses = (() => {
+    const durs: number[] = [];
+    for (const c of antigos) {
+      if (!c.mes_inicio || !c.updated_at) continue;
+      const [yi, mi] = c.mes_inicio.slice(0, 7).split("-").map(Number);
+      const fim = new Date(c.updated_at);
+      const meses =
+        (fim.getFullYear() - yi) * 12 + (fim.getMonth() + 1 - mi);
+      if (meses > 0) durs.push(meses);
+    }
+    if (!durs.length) return null;
+    return durs.reduce((s, n) => s + n, 0) / durs.length;
+  })();
+
+  // ---------- Funil prospect → cliente ----------
+  // ativos com mes_inicio nos últimos 3 meses (presumidamente vieram de prospect)
+  const tresMesesAtras = new Date();
+  tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+  const convertidos3m = clients.filter(
+    (c) => c.mes_inicio && new Date(c.mes_inicio) >= tresMesesAtras && c.status !== "prospect",
+  ).length;
+  const pipelineTotal = prospects.length + convertidos3m;
+  const conversao = pipelineTotal > 0 ? (convertidos3m / pipelineTotal) * 100 : 0;
+
+  // ---------- Motivos de saída ----------
+  const motivos = (() => {
+    const map = new Map<string, number>();
+    for (const c of antigos) {
+      const m = (c as unknown as { motivo_saida: string | null }).motivo_saida;
+      if (!m) continue;
+      const key = m.trim().toLowerCase().slice(0, 60);
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([motivo, n]) => ({ motivo, n }));
+  })();
+  const antigosSemMotivo = antigos.filter(
+    (c) => !(c as unknown as { motivo_saida: string | null }).motivo_saida,
+  ).length;
+
   if (l1 || l2 || l3) {
     return (
       <div className="py-16 flex justify-center">

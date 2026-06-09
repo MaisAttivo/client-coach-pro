@@ -2,14 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import {
-  TrendingUp, TrendingDown, Repeat, PiggyBank, Calendar, Target, Sparkles,
+  TrendingUp, TrendingDown, Repeat, PiggyBank, Calendar, Target, Sparkles, Wallet,
 } from "lucide-react";
 import { mesRef, mesRefLabel, shiftMes, fmtEUR, fmtEURcompact } from "@/lib/fin-shared";
 import { getMonthOverview } from "@/lib/fin-month";
 import { valorMensalEfetivo } from "@/lib/fin-fixed";
-import { deltaPct, projectToEndOfMonth, fmtDelta } from "@/lib/analytics-shared";
+import { deltaPct, projectToEndOfMonth, fmtDelta, monthsRunway, avg } from "@/lib/analytics-shared";
 import { Card } from "@/components/ui/card";
 import { MonthNavigator } from "@/components/MonthNavigator";
+import { CategoryDrillDownDialog } from "@/components/financas/CategoryDrillDownDialog";
 import { BarChart, Bar, Line, ComposedChart, XAxis, ResponsiveContainer, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/financas/")({

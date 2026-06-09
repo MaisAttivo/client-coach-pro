@@ -174,6 +174,38 @@ function DashboardPage() {
         onSaved={() => queryClient.invalidateQueries({ queryKey: ["pt_clients"] })}
       />
 
+      {/* Treinos programados deste mês */}
+      <Card className="p-5 bg-surface border-border">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground font-medium flex items-center gap-1.5">
+              <Dumbbell className="w-3 h-3 text-primary" />
+              Treinos programados · {mesNome(now).split(" ")[0]}
+            </p>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="font-display text-4xl font-semibold tracking-tight">{treinosProgramados}</span>
+              <span className="text-xs text-muted-foreground">
+                · {treinosDadosMes} dados ({treinosProgramados > 0 ? Math.round((treinosDadosMes / treinosProgramados) * 100) : 0}%)
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5">
+              <span className="text-foreground font-medium">{treinosMensal}</span> mensalidade
+              {" + "}
+              <span className="text-foreground font-medium">{treinosPacks}</span> packs
+            </p>
+          </div>
+        </div>
+        {treinosProgramados > 0 && (
+          <div className="mt-3 h-1 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${Math.min(100, (treinosDadosMes / treinosProgramados) * 100)}%` }}
+            />
+          </div>
+        )}
+      </Card>
+
+
       {/* Em falta com WhatsApp + atraso */}
       {emFalta.length > 0 && diasAtraso > 0 && (
         <Card className="p-4 bg-surface border-border">

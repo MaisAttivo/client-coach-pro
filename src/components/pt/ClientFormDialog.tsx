@@ -137,6 +137,7 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
         forecast_notas: form.forecast_notas.trim() || null,
         treinos_pagos: Math.max(0, Math.trunc(num(form.treinos_pagos))),
         treinos_dados: Math.max(0, Math.trunc(num(form.treinos_dados))),
+        motivo_saida: form.status === "antigo" ? (form.motivo_saida.trim() || null) : null,
         // legacy fields kept to satisfy NOT NULL defaults
       };
       if (client) {
@@ -157,9 +158,13 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved, defaultS
 
   const handleSuspend = async () => {
     if (!client) return;
+    const motivo = window.prompt("Motivo de saída? (opcional)", "") ?? "";
     setSaving(true);
     try {
-      await updateClient(client.id, { status: "antigo" });
+      await updateClient(client.id, {
+        status: "antigo",
+        motivo_saida: motivo.trim() || null,
+      });
       toast.success("Cliente suspenso");
       onSaved();
       onOpenChange(false);

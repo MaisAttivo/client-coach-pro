@@ -423,12 +423,78 @@ function ReportsPage() {
         </Card>
       </div>
 
+      {/* MRR / ARR / LTV */}
+      <Card className="p-4 bg-surface border-border">
+        <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <Repeat className="w-4 h-4 text-primary" /> Receita recorrente
+        </p>
+        <div className="grid grid-cols-2 gap-2.5 mb-3">
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">MRR</p>
+            <p className="font-display text-xl font-semibold privacy-blur">{fmtEUR(mrr)}</p>
+          </div>
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">ARR</p>
+            <p className="font-display text-xl font-semibold privacy-blur">{fmtEUR(arr)}</p>
+          </div>
+        </div>
+        <ul className="space-y-2 text-sm">
+          <Row label="LTV médio" value={fmtEUR(ltvMedia)} />
+          <Row label="Tempo médio de vida" value={tempoMedioMeses !== null ? `${tempoMedioMeses.toFixed(1)} meses` : "—"} />
+          <Row label="Churn mensal" value={`${churnRate.toFixed(1)}%`} icon={churnRate > 5 ? LogOut : undefined} />
+        </ul>
+      </Card>
+
+      {/* Funil prospect → cliente */}
+      <Card className="p-4 bg-surface border-border">
+        <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <Filter className="w-4 h-4 text-primary" /> Funil de conversão
+        </p>
+        <ul className="space-y-2 text-sm">
+          <Row label="Prospects no pipeline" value={String(prospects.length)} />
+          <Row label="Convertidos últimos 3 meses" value={String(convertidos3m)} />
+          <Row label="Taxa de conversão" value={`${conversao.toFixed(0)}%`} />
+        </ul>
+        {pipelineTotal > 0 && (
+          <div className="mt-3 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+            <div className="h-full bg-primary rounded-full" style={{ width: `${conversao}%` }} />
+          </div>
+        )}
+      </Card>
+
+      {/* Motivos de saída */}
+      {antigos.length > 0 && (
+        <Card className="p-4 bg-surface border-border">
+          <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+            <LogOut className="w-4 h-4 text-destructive" /> Motivos de saída
+          </p>
+          {motivos.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Ainda sem motivos registados. Adiciona ao suspender cliente.
+            </p>
+          ) : (
+            <ul className="space-y-1.5 text-sm">
+              {motivos.map((m) => (
+                <li key={m.motivo} className="flex justify-between items-center">
+                  <span className="capitalize truncate">{m.motivo}</span>
+                  <span className="font-mono text-xs text-muted-foreground shrink-0">{m.n}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {antigosSemMotivo > 0 && (
+            <p className="text-[10px] text-muted-foreground mt-3 pt-2 border-t border-border/40">
+              {antigosSemMotivo} antigo{antigosSemMotivo === 1 ? "" : "s"} sem motivo registado
+            </p>
+          )}
+        </Card>
+      )}
+
       {/* Saúde do negócio */}
       <Card className="p-4 bg-surface border-border">
         <p className="text-sm font-semibold text-foreground mb-3">Saúde do negócio</p>
         <ul className="space-y-2 text-sm">
           <Row label="Taxa de retenção" value={`${retencao.toFixed(0)}%`} />
-          <Row label="Prospects no pipeline" value={String(prospects.length)} />
           <Row label="Descontos ativos" value={fmtEUR(totalDescontos)} icon={Gift} />
           <Row label="Receita média / mês (12m)" value={fmtEUR(mediaReceitaMes)} />
           <Row label="Treinos médios / mês (12m)" value={mediaTreinosMes.toFixed(1)} />

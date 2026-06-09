@@ -292,18 +292,24 @@ function DashboardPage() {
               const widthPct = (c.total / maxCat) * 100;
               return (
                 <li key={c.id ?? c.nome}>
-                  <div className="flex justify-between items-baseline text-xs mb-1">
-                    <span className="font-medium">{c.nome}</span>
-                    <span className="text-muted-foreground font-mono privacy-blur">
-                      {fmtEUR(c.total)} · {pct.toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${widthPct}%`, background: c.cor }}
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDrill({ id: c.id, nome: c.nome, cor: c.cor, total: c.total })}
+                    className="w-full text-left hover:opacity-80 transition-opacity"
+                  >
+                    <div className="flex justify-between items-baseline text-xs mb-1">
+                      <span className="font-medium">{c.nome}</span>
+                      <span className="text-muted-foreground font-mono privacy-blur">
+                        {fmtEUR(c.total)} · {pct.toFixed(0)}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${widthPct}%`, background: c.cor }}
+                      />
+                    </div>
+                  </button>
                 </li>
               );
             })}

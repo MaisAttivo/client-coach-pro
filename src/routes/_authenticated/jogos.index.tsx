@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Dices, Plus } from "lucide-react";
+import { Dices, Plus, StickyNote } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/jogos/")({
   component: JogosIndex,
@@ -11,6 +11,7 @@ type Game = {
   description: string;
   to?: string;
   available: boolean;
+  icon?: typeof Dices;
 };
 
 const GAMES: Game[] = [
@@ -20,6 +21,15 @@ const GAMES: Game[] = [
     description: "Scoreboard: cartas na mão, rondas ganhas e vencedor.",
     to: "/jogos/quickstop",
     available: true,
+    icon: Dices,
+  },
+  {
+    id: "album-wc26",
+    name: "Álbum World Cup 26",
+    description: "Gestor de cromos: completion %, faltas, repetidos e filtros.",
+    to: "/jogos/album",
+    available: true,
+    icon: StickyNote,
   },
 ];
 

@@ -26,6 +26,7 @@ import { Route as AuthenticatedPtReportsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
 import { Route as AuthenticatedPtClientsRouteImport } from './routes/_authenticated/pt.clients'
 import { Route as AuthenticatedJogosQuickstopRouteImport } from './routes/_authenticated/jogos.quickstop'
+import { Route as AuthenticatedJogosAlbumRouteImport } from './routes/_authenticated/jogos.album'
 import { Route as AuthenticatedImobiliarioConfigRouteImport } from './routes/_authenticated/imobiliario.config'
 import { Route as AuthenticatedFinancasVariaveisRouteImport } from './routes/_authenticated/financas.variaveis'
 import { Route as AuthenticatedFinancasFixasRouteImport } from './routes/_authenticated/financas.fixas'
@@ -122,6 +123,11 @@ const AuthenticatedJogosQuickstopRoute =
     path: '/quickstop',
     getParentRoute: () => AuthenticatedJogosRoute,
   } as any)
+const AuthenticatedJogosAlbumRoute = AuthenticatedJogosAlbumRouteImport.update({
+  id: '/album',
+  path: '/album',
+  getParentRoute: () => AuthenticatedJogosRoute,
+} as any)
 const AuthenticatedImobiliarioConfigRoute =
   AuthenticatedImobiliarioConfigRouteImport.update({
     id: '/config',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
+  '/jogos/album': typeof AuthenticatedJogosAlbumRoute
   '/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
+  '/jogos/album': typeof AuthenticatedJogosAlbumRoute
   '/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/financas/fixas': typeof AuthenticatedFinancasFixasRoute
   '/_authenticated/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/_authenticated/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
+  '/_authenticated/jogos/album': typeof AuthenticatedJogosAlbumRoute
   '/_authenticated/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
   '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/financas/fixas'
     | '/financas/variaveis'
     | '/imobiliario/config'
+    | '/jogos/album'
     | '/jogos/quickstop'
     | '/pt/clients'
     | '/pt/payments'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/financas/fixas'
     | '/financas/variaveis'
     | '/imobiliario/config'
+    | '/jogos/album'
     | '/jogos/quickstop'
     | '/pt/clients'
     | '/pt/payments'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financas/fixas'
     | '/_authenticated/financas/variaveis'
     | '/_authenticated/imobiliario/config'
+    | '/_authenticated/jogos/album'
     | '/_authenticated/jogos/quickstop'
     | '/_authenticated/pt/clients'
     | '/_authenticated/pt/payments'
@@ -428,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJogosQuickstopRouteImport
       parentRoute: typeof AuthenticatedJogosRoute
     }
+    '/_authenticated/jogos/album': {
+      id: '/_authenticated/jogos/album'
+      path: '/album'
+      fullPath: '/jogos/album'
+      preLoaderRoute: typeof AuthenticatedJogosAlbumRouteImport
+      parentRoute: typeof AuthenticatedJogosRoute
+    }
     '/_authenticated/imobiliario/config': {
       id: '/_authenticated/imobiliario/config'
       path: '/config'
@@ -513,11 +532,13 @@ const AuthenticatedImobiliarioRouteWithChildren =
   )
 
 interface AuthenticatedJogosRouteChildren {
+  AuthenticatedJogosAlbumRoute: typeof AuthenticatedJogosAlbumRoute
   AuthenticatedJogosQuickstopRoute: typeof AuthenticatedJogosQuickstopRoute
   AuthenticatedJogosIndexRoute: typeof AuthenticatedJogosIndexRoute
 }
 
 const AuthenticatedJogosRouteChildren: AuthenticatedJogosRouteChildren = {
+  AuthenticatedJogosAlbumRoute: AuthenticatedJogosAlbumRoute,
   AuthenticatedJogosQuickstopRoute: AuthenticatedJogosQuickstopRoute,
   AuthenticatedJogosIndexRoute: AuthenticatedJogosIndexRoute,
 }

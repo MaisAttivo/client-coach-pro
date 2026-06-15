@@ -56,6 +56,7 @@ import {
   type Sticker,
 } from "@/lib/wc26-stickers";
 import { SECTIONS_ORDER } from "@/lib/wc26-catalog";
+import { exportCatalogCsv, exportCatalogPdf } from "@/lib/album-export";
 
 export const Route = createFileRoute("/_authenticated/jogos/album")({
   head: () => ({ meta: [{ title: "Álbum World Cup 26" }] }),

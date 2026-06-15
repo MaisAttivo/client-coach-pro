@@ -11,6 +11,8 @@ import {
   Trash2,
   Pencil,
   Copy,
+  Download,
+  FileText,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

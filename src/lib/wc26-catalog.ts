@@ -52,38 +52,38 @@ type TeamDef = { code: string; name: string };
 const GROUPS: Record<string, TeamDef[]> = {
   A: [
     { code: "MEX", name: "México" },
+    { code: "RSA", name: "África do Sul" },
     { code: "KOR", name: "Coreia do Sul" },
     { code: "CZE", name: "República Checa" },
-    { code: "RSA", name: "África do Sul" },
   ],
   B: [
-    { code: "SUI", name: "Suíça" },
     { code: "CAN", name: "Canadá" },
-    { code: "QAT", name: "Catar" },
     { code: "BIH", name: "Bósnia e Herzegovina" },
+    { code: "QAT", name: "Catar" },
+    { code: "SUI", name: "Suíça" },
   ],
   C: [
-    { code: "SCO", name: "Escócia" },
-    { code: "MAR", name: "Marrocos" },
     { code: "BRA", name: "Brasil" },
+    { code: "MAR", name: "Marrocos" },
     { code: "HAI", name: "Haiti" },
+    { code: "SCO", name: "Escócia" },
   ],
   D: [
     { code: "USA", name: "Estados Unidos" },
+    { code: "PAR", name: "Paraguai" },
     { code: "AUS", name: "Austrália" },
     { code: "TUR", name: "Turquia" },
-    { code: "PAR", name: "Paraguai" },
   ],
   E: [
     { code: "GER", name: "Alemanha" },
+    { code: "CUW", name: "Curaçau" },
     { code: "CIV", name: "Costa do Marfim" },
     { code: "ECU", name: "Equador" },
-    { code: "CUW", name: "Curaçau" },
   ],
   F: [
-    { code: "SWE", name: "Suécia" },
-    { code: "JPN", name: "Japão" },
     { code: "NED", name: "Países Baixos" },
+    { code: "JPN", name: "Japão" },
+    { code: "SWE", name: "Suécia" },
     { code: "TUN", name: "Tunísia" },
   ],
   G: [
@@ -94,35 +94,36 @@ const GROUPS: Record<string, TeamDef[]> = {
   ],
   H: [
     { code: "ESP", name: "Espanha" },
-    { code: "URU", name: "Uruguai" },
     { code: "CPV", name: "Cabo Verde" },
     { code: "KSA", name: "Arábia Saudita" },
+    { code: "URU", name: "Uruguai" },
   ],
   I: [
     { code: "FRA", name: "França" },
-    { code: "NOR", name: "Noruega" },
     { code: "SEN", name: "Senegal" },
     { code: "IRQ", name: "Iraque" },
+    { code: "NOR", name: "Noruega" },
   ],
   J: [
-    { code: "AUT", name: "Áustria" },
     { code: "ARG", name: "Argentina" },
     { code: "ALG", name: "Argélia" },
+    { code: "AUT", name: "Áustria" },
     { code: "JOR", name: "Jordânia" },
   ],
   K: [
     { code: "POR", name: "Portugal" },
-    { code: "COL", name: "Colômbia" },
     { code: "COD", name: "RD Congo" },
     { code: "UZB", name: "Usbequistão" },
+    { code: "COL", name: "Colômbia" },
   ],
   L: [
-    { code: "CRO", name: "Croácia" },
     { code: "ENG", name: "Inglaterra" },
+    { code: "CRO", name: "Croácia" },
     { code: "GHA", name: "Gana" },
     { code: "PAN", name: "Panamá" },
   ],
 };
+
 
 
 export const GROUP_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];

@@ -127,13 +127,9 @@ export function buildDefaultCatalog(): CatalogEntry[] {
   const out: CatalogEntry[] = [];
   let n = 1;
 
-  // FWC 1–9 (especiais de abertura)
+  // FWC 1–20 (especiais de abertura / história)
   for (const s of SPECIALS) {
     out.push({ number: n++, section: "Especiais", team: null, label: s.label, is_special: true });
-  }
-  // FWC 10–20 (lendas)
-  for (const l of LEGENDS) {
-    out.push({ number: n++, section: "Especiais", team: null, label: l.label, is_special: true });
   }
 
   // Grupos A–L
@@ -142,12 +138,12 @@ export function buildDefaultCatalog(): CatalogEntry[] {
     for (const t of teams) {
       const sectionName = `Grupo ${g}`;
       const teamName = `${t.code} — ${t.name}`;
-      // Ordem oficial por equipa (20 cromos):
+      // Ordem por equipa (22 cromos):
       //   1       → Escudo
       //   2–12    → Jogadores 1–11
       //   13      → Foto de equipa
-      //   14–20   → Jogadores 12–18
-      for (let i = 1; i <= 20; i++) {
+      //   14–22   → Jogadores 12–20
+      for (let i = 1; i <= 22; i++) {
         let label: string;
         let is_special = false;
         if (i === 1) {
@@ -156,7 +152,8 @@ export function buildDefaultCatalog(): CatalogEntry[] {
         } else if (i === 13) {
           label = `${t.code} — Foto de equipa`;
         } else {
-          label = `${t.code} ${i}`;
+          const playerNumber = i < 13 ? i - 1 : i - 2;
+          label = `${t.code} ${playerNumber}`;
         }
         out.push({
           number: n++,

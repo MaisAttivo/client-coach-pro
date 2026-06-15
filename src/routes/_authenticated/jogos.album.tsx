@@ -424,6 +424,27 @@ function AlbumPage() {
             })}
           </div>
 
+          {/* Exportar catálogo */}
+          <div className="pt-4 border-t border-border">
+            <p className="text-[9px] uppercase tracking-[0.32em] text-muted-foreground px-1 mb-2">
+              Exportar
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline" size="sm" className="flex-1"
+                onClick={() => { exportCatalogCsv(stickers); toast.success("CSV exportado"); }}
+              >
+                <Download className="w-3.5 h-3.5" /> CSV
+              </Button>
+              <Button
+                variant="outline" size="sm" className="flex-1"
+                onClick={() => { exportCatalogPdf(stickers); toast.success("PDF exportado"); }}
+              >
+                <FileText className="w-3.5 h-3.5" /> PDF
+              </Button>
+            </div>
+          </div>
+
           {/* Acções perigosas */}
           <div className="pt-6 border-t border-border flex gap-2">
             <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmReset("reset")}>

@@ -630,6 +630,17 @@ function Stat({ label, value, accent }: { label: string; value: number; accent: 
   );
 }
 
+function shortTitle(label: string): string {
+  const parts = label.split(" — ");
+  if (parts.length === 2) {
+    const code = parts[0];
+    const rest = parts[1];
+    if (rest === "Foto de equipa") return `${code} Foto`;
+    return `${code} ${rest}`;
+  }
+  return label;
+}
+
 function StickerCard({
   sticker: s,
   onToggle,
@@ -664,20 +675,16 @@ function StickerCard({
       </button>
 
       <div className="flex items-baseline gap-1">
-        <span className="text-[10px] text-muted-foreground tabular-nums">#</span>
-        <span className="font-display text-base font-semibold tabular-nums leading-none">
-          {s.number}
+        <span className="font-display text-lg font-semibold tabular-nums leading-none">
+          {shortTitle(s.label)}
         </span>
         {s.is_special && (
           <Sparkles className="w-3 h-3 text-amber-500 ml-auto mr-5" />
         )}
       </div>
-      <button
-        onClick={onEdit}
-        className="text-[10px] text-left leading-tight line-clamp-2 min-h-[24px] text-foreground/90 hover:text-primary"
-      >
-        {s.label}
-      </button>
+      <span className="text-[9px] text-muted-foreground tabular-nums">
+        #{s.number}
+      </span>
       {showContext && (
         <p className="text-[9px] text-muted-foreground truncate">
           {s.team ?? s.section}

@@ -84,7 +84,7 @@ function AlbumPage() {
   }
   function setTeam(next: string | null) {
     navigate({
-      search: (prev) => ({ section: prev.section, ...(next ? { team: next } : {}) }),
+      search: (prev: AlbumSearch) => ({ section: prev.section, ...(next ? { team: next } : {}) }),
       replace: false,
     });
   }

@@ -17,32 +17,31 @@ export type CatalogEntry = {
   is_special: boolean;
 };
 
-// ---- Especiais de abertura (FWC) ----
+// ---- Especiais de abertura (FWC 1–8) ----
 const SPECIALS: { label: string }[] = [
-  { label: "FWC Pôster Oficial" },
-  { label: "FWC Emblema do Torneio" },
-  { label: "FWC Troféu FIFA" },
-  { label: "FWC Bola Oficial" },
-  { label: "FWC Mascote — Maple (Canadá)" },
-  { label: "FWC Mascote — Zayu (México)" },
-  { label: "FWC Mascote — Clutch (EUA)" },
-  { label: "FWC Slogan / Identidade" },
-  { label: "FWC Países Anfitriões — CAN · MEX · USA" },
+  { label: "FWC 1 — Emblema Oficial" },
+  { label: "FWC 2 — Troféu FIFA" },
+  { label: "FWC 3 — Mascotes Oficiais (Maple · Zayu · Clutch)" },
+  { label: "FWC 4 — Slogan Oficial" },
+  { label: "FWC 5 — Bola Oficial (Trionda)" },
+  { label: "FWC 6 — Emblema Anfitrião CAN" },
+  { label: "FWC 7 — Emblema Anfitrião MEX" },
+  { label: "FWC 8 — Emblema Anfitrião USA" },
 ];
 
-// ---- Past Winners / Lendas ----
+// ---- FIFA World Cup History — Past Winners (FWC 9–19) ----
 const LEGENDS: { label: string }[] = [
-  { label: "Past Winners — Uruguai 1930" },
-  { label: "Past Winners — Itália 1934/1938" },
-  { label: "Past Winners — Alemanha 1954/74/90/2014" },
-  { label: "Past Winners — Brasil 1958/62/70/94/2002" },
-  { label: "Past Winners — Inglaterra 1966" },
-  { label: "Past Winners — Argentina 1978/86/2022" },
-  { label: "Past Winners — França 1998/2018" },
-  { label: "Past Winners — Espanha 2010" },
-  { label: "Past Winners — Itália 2006" },
-  { label: "Past Winners — Alemanha 2014" },
-  { label: "Past Winners — Argentina 2022" },
+  { label: "FWC 9 — Itália 1934 (campeã)" },
+  { label: "FWC 10 — Uruguai 1950 (campeã)" },
+  { label: "FWC 11 — Alemanha FR 1954 (campeã)" },
+  { label: "FWC 12 — Brasil 1962 (campeã)" },
+  { label: "FWC 13 — Alemanha FR 1974 (campeã)" },
+  { label: "FWC 14 — Argentina 1986 (campeã)" },
+  { label: "FWC 15 — Brasil 1994 (campeã)" },
+  { label: "FWC 16 — França 1998 (campeã)" },
+  { label: "FWC 17 — Itália 2006 (campeã)" },
+  { label: "FWC 18 — Espanha 2010 (campeã)" },
+  { label: "FWC 19 — Argentina 2022 (campeã)" },
 ];
 
 // ---- Grupos A–L (48 equipas, código + nome PT) ----

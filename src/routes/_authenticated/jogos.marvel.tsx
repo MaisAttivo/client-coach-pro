@@ -81,6 +81,14 @@ function MarvelRewatchPage() {
     mutationFn: () => resetMcu(user!.id),
     onSuccess: invalidate,
   });
+  const rebuild = useMutation({
+    mutationFn: async () => {
+      await resetMcu(user!.id);
+      return seedMcu(user!.id);
+    },
+    onSuccess: invalidate,
+  });
+
   const toggle = useMutation({
     mutationFn: (v: { id: string; watched: boolean }) => setWatched(v.id, v.watched),
     onSuccess: invalidate,
@@ -331,7 +339,20 @@ function MarvelRewatchPage() {
         })}
       </ul>
 
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6 flex justify-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground"
+          disabled={rebuild.isPending}
+          onClick={() => {
+            if (confirm("Recriar a lista pela ordem cronológica? Perdes as marcações atuais."))
+              rebuild.mutate();
+          }}
+        >
+          <RotateCcw className="w-3.5 h-3.5 mr-2" />
+          {rebuild.isPending ? "A recriar…" : "Recriar lista"}
+        </Button>
         <Button
           variant="ghost"
           size="sm"
@@ -340,10 +361,10 @@ function MarvelRewatchPage() {
             if (confirm("Apagar toda a lista do Marvel Rewatch?")) reset.mutate();
           }}
         >
-          <RotateCcw className="w-3.5 h-3.5 mr-2" />
-          Apagar lista
+          Apagar
         </Button>
       </div>
+
     </main>
   );
 }

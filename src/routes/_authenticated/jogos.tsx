@@ -4,7 +4,7 @@ import { ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/jogos")({
-  head: () => ({ meta: [{ title: "Jogos" }] }),
+  head: () => ({ meta: [{ title: "Jogos e entretenimento" }] }),
   component: JogosLayout,
 });
 
@@ -23,8 +23,9 @@ function JogosLayout() {
           </Link>
           <div className="min-w-0">
             <p className="text-[9px] uppercase tracking-[0.32em] text-primary font-medium">
-              JP HUB · Jogos
+              JP HUB · Jogos e entretenimento
             </p>
+
             <h1 className="font-display text-3xl leading-none mt-1.5 font-semibold tracking-tight truncate">
               Game <span className="text-primary italic font-light">night</span>
             </h1>

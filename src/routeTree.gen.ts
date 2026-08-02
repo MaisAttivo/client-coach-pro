@@ -26,6 +26,7 @@ import { Route as AuthenticatedPtReportsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPtPaymentsRouteImport } from './routes/_authenticated/pt.payments'
 import { Route as AuthenticatedPtClientsRouteImport } from './routes/_authenticated/pt.clients'
 import { Route as AuthenticatedJogosQuickstopRouteImport } from './routes/_authenticated/jogos.quickstop'
+import { Route as AuthenticatedJogosMarvelRouteImport } from './routes/_authenticated/jogos.marvel'
 import { Route as AuthenticatedJogosAlbumRouteImport } from './routes/_authenticated/jogos.album'
 import { Route as AuthenticatedImobiliarioConfigRouteImport } from './routes/_authenticated/imobiliario.config'
 import { Route as AuthenticatedFinancasVariaveisRouteImport } from './routes/_authenticated/financas.variaveis'
@@ -123,6 +124,12 @@ const AuthenticatedJogosQuickstopRoute =
     path: '/quickstop',
     getParentRoute: () => AuthenticatedJogosRoute,
   } as any)
+const AuthenticatedJogosMarvelRoute =
+  AuthenticatedJogosMarvelRouteImport.update({
+    id: '/marvel',
+    path: '/marvel',
+    getParentRoute: () => AuthenticatedJogosRoute,
+  } as any)
 const AuthenticatedJogosAlbumRoute = AuthenticatedJogosAlbumRouteImport.update({
   id: '/album',
   path: '/album',
@@ -179,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
   '/jogos/album': typeof AuthenticatedJogosAlbumRoute
+  '/jogos/marvel': typeof AuthenticatedJogosMarvelRoute
   '/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -200,6 +208,7 @@ export interface FileRoutesByTo {
   '/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
   '/jogos/album': typeof AuthenticatedJogosAlbumRoute
+  '/jogos/marvel': typeof AuthenticatedJogosMarvelRoute
   '/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/pt/clients': typeof AuthenticatedPtClientsRoute
   '/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -227,6 +236,7 @@ export interface FileRoutesById {
   '/_authenticated/financas/variaveis': typeof AuthenticatedFinancasVariaveisRoute
   '/_authenticated/imobiliario/config': typeof AuthenticatedImobiliarioConfigRoute
   '/_authenticated/jogos/album': typeof AuthenticatedJogosAlbumRoute
+  '/_authenticated/jogos/marvel': typeof AuthenticatedJogosMarvelRoute
   '/_authenticated/jogos/quickstop': typeof AuthenticatedJogosQuickstopRoute
   '/_authenticated/pt/clients': typeof AuthenticatedPtClientsRoute
   '/_authenticated/pt/payments': typeof AuthenticatedPtPaymentsRoute
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/financas/variaveis'
     | '/imobiliario/config'
     | '/jogos/album'
+    | '/jogos/marvel'
     | '/jogos/quickstop'
     | '/pt/clients'
     | '/pt/payments'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/financas/variaveis'
     | '/imobiliario/config'
     | '/jogos/album'
+    | '/jogos/marvel'
     | '/jogos/quickstop'
     | '/pt/clients'
     | '/pt/payments'
@@ -301,6 +313,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financas/variaveis'
     | '/_authenticated/imobiliario/config'
     | '/_authenticated/jogos/album'
+    | '/_authenticated/jogos/marvel'
     | '/_authenticated/jogos/quickstop'
     | '/_authenticated/pt/clients'
     | '/_authenticated/pt/payments'
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJogosQuickstopRouteImport
       parentRoute: typeof AuthenticatedJogosRoute
     }
+    '/_authenticated/jogos/marvel': {
+      id: '/_authenticated/jogos/marvel'
+      path: '/marvel'
+      fullPath: '/jogos/marvel'
+      preLoaderRoute: typeof AuthenticatedJogosMarvelRouteImport
+      parentRoute: typeof AuthenticatedJogosRoute
+    }
     '/_authenticated/jogos/album': {
       id: '/_authenticated/jogos/album'
       path: '/album'
@@ -533,12 +553,14 @@ const AuthenticatedImobiliarioRouteWithChildren =
 
 interface AuthenticatedJogosRouteChildren {
   AuthenticatedJogosAlbumRoute: typeof AuthenticatedJogosAlbumRoute
+  AuthenticatedJogosMarvelRoute: typeof AuthenticatedJogosMarvelRoute
   AuthenticatedJogosQuickstopRoute: typeof AuthenticatedJogosQuickstopRoute
   AuthenticatedJogosIndexRoute: typeof AuthenticatedJogosIndexRoute
 }
 
 const AuthenticatedJogosRouteChildren: AuthenticatedJogosRouteChildren = {
   AuthenticatedJogosAlbumRoute: AuthenticatedJogosAlbumRoute,
+  AuthenticatedJogosMarvelRoute: AuthenticatedJogosMarvelRoute,
   AuthenticatedJogosQuickstopRoute: AuthenticatedJogosQuickstopRoute,
   AuthenticatedJogosIndexRoute: AuthenticatedJogosIndexRoute,
 }

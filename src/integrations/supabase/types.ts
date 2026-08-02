@@ -395,6 +395,60 @@ export type Database = {
         }
         Relationships: []
       }
+      mcu_items: {
+        Row: {
+          created_at: string
+          episode: number | null
+          id: string
+          kind: string
+          order_index: number
+          phase: string | null
+          runtime_min: number
+          season: number | null
+          series: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          watched: boolean
+          watched_at: string | null
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          episode?: number | null
+          id?: string
+          kind: string
+          order_index?: number
+          phase?: string | null
+          runtime_min?: number
+          season?: number | null
+          series?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          watched?: boolean
+          watched_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          episode?: number | null
+          id?: string
+          kind?: string
+          order_index?: number
+          phase?: string | null
+          runtime_min?: number
+          season?: number | null
+          series?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          watched?: boolean
+          watched_at?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       pt_clients: {
         Row: {
           ativo: boolean

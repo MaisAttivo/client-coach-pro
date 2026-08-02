@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Dices, Plus, StickyNote } from "lucide-react";
+import { Clapperboard, Dices, Plus, StickyNote } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/jogos/")({
   component: JogosIndex,

@@ -4,7 +4,7 @@ import { ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/jogos")({
-  head: () => ({ meta: [{ title: "Jogos" }] }),
+  head: () => ({ meta: [{ title: "Jogos e entretenimento" }] }),
   component: JogosLayout,
 });
 

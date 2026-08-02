@@ -81,6 +81,14 @@ function MarvelRewatchPage() {
     mutationFn: () => resetMcu(user!.id),
     onSuccess: invalidate,
   });
+  const rebuild = useMutation({
+    mutationFn: async () => {
+      await resetMcu(user!.id);
+      return seedMcu(user!.id);
+    },
+    onSuccess: invalidate,
+  });
+
   const toggle = useMutation({
     mutationFn: (v: { id: string; watched: boolean }) => setWatched(v.id, v.watched),
     onSuccess: invalidate,

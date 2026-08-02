@@ -44,12 +44,13 @@ const APPS: AppItem[] = [
   },
   {
     id: "jogos",
-    name: "Jogos",
-    description: "Ferramentas para jogos de tabuleiro (scoreboards, etc).",
+    name: "Jogos e entretenimento",
+    description: "Scoreboards, álbum de cromos e Marvel Rewatch.",
     to: "/jogos",
     icon: Dices,
     available: true,
   },
+
 ];
 
 

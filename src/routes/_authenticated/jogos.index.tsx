@@ -32,14 +32,23 @@ const GAMES: Game[] = [
     available: true,
     icon: StickyNote,
   },
+  {
+    id: "marvel",
+    name: "Marvel Rewatch",
+    description: "Filmes e episódios a ver antes de Avengers: Doomsday (18 dez 2026).",
+    to: "/jogos/marvel",
+    available: true,
+    icon: Clapperboard,
+  },
 ];
 
 function JogosIndex() {
   return (
     <main className="px-5 pb-16">
       <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4 mt-2">
-        Os teus jogos
+        Jogos e entretenimento
       </p>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {GAMES.map((g) => (
           <Link

@@ -145,6 +145,12 @@ function DashboardPage() {
             </span>
           </div>
         )}
+        {data.despesas.previstas > 0 && (
+          <div className="mt-2 flex items-center justify-between text-[11px]">
+            <span className="text-muted-foreground">Fixas por pagar (não contam)</span>
+            <span className="font-mono text-muted-foreground privacy-blur">{fmtEUR(data.despesas.previstas)}</span>
+          </div>
+        )}
       </Card>
 
       {/* Runway / saldo acumulado */}

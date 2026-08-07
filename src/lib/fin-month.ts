@@ -47,33 +47,39 @@ export async function getMonthOverview(ym: string): Promise<MonthOverview> {
     .filter((t) => t.origem !== "fixa_gerada")
     .reduce((s, t) => s + Number(t.valor), 0);
 
-  // Fixas (uma vez por despesa, exclui aquelas já materializadas em fin_transactions)
+  // Fixas: só contam para o saldo quando marcadas como pagas (existe tx no mês)
+  const fixedById = new Map(fixed.map((f) => [f.id, f]));
   const materializedIds = new Set(
     txDespesas.filter((t) => t.fixed_expense_id).map((t) => t.fixed_expense_id as string),
   );
   const fixasNaoMaterializadas = fixasAtivas.filter((f) => !materializedIds.has(f.id));
-  const fixasMaterializadasTotal = txDespesas
-    .filter((t) => t.origem === "fixa_gerada")
-    .reduce((s, t) => s + Number(t.valor), 0);
-  const fixasVirtuaisTotal = fixasNaoMaterializadas
-    .filter((f) => f.tipo_recorrencia === "mensal")
-    .reduce((s, f) => s + valorMensalEfetivo(f), 0);
-  const provisoes = fixasNaoMaterializadas
-    .filter((f) => f.tipo_recorrencia === "anual_provisao")
-    .reduce((s, f) => s + valorMensalEfetivo(f), 0);
 
-  // Créditos virtuais: prestação dos créditos ativos sem tx neste mês
+  const txFixas = txDespesas.filter((t) => t.fixed_expense_id);
+  const fixasPagasMensal = txFixas
+    .filter((t) => fixedById.get(t.fixed_expense_id as string)?.tipo_recorrencia !== "anual_provisao")
+    .reduce((s, t) => s + Number(t.valor), 0);
+  const provisoes = txFixas
+    .filter((t) => fixedById.get(t.fixed_expense_id as string)?.tipo_recorrencia === "anual_provisao")
+    .reduce((s, t) => s + Number(t.valor), 0);
+
+  // Créditos: idem, só contam quando pagos
   const creditTxIds = new Set(
     txDespesas.filter((t) => t.credit_id).map((t) => t.credit_id as string),
   );
-  const creditosVirtuaisTotal = credits
+  const creditosPagos = txDespesas
+    .filter((t) => t.credit_id)
+    .reduce((s, t) => s + Number(t.valor), 0);
+  const creditosPorPagar = credits
     .filter((c) => c.ativo && !creditTxIds.has(c.id))
     .reduce((s, c) => s + Number(c.prestacao_mensal ?? 0), 0);
 
-  const fixas = fixasVirtuaisTotal + fixasMaterializadasTotal + creditosVirtuaisTotal;
+  const previstas =
+    fixasNaoMaterializadas.reduce((s, f) => s + valorMensalEfetivo(f), 0) + creditosPorPagar;
+
+  const fixas = fixasPagasMensal + creditosPagos;
   const despesasTotal = fixas + provisoes + variaveis;
 
-  // Breakdown por categoria (despesas)
+  // Breakdown por categoria (apenas despesas efetivamente pagas)
   const catMap = new Map<string, { id: string | null; nome: string; cor: string; total: number }>();
   const catLookup = new Map(categories.map((c) => [c.id, c]));
 
@@ -88,15 +94,7 @@ export async function getMonthOverview(ym: string): Promise<MonthOverview> {
     const c = t.categoria_id ? catLookup.get(t.categoria_id) : null;
     addCat(c?.id ?? null, c?.nome ?? "Sem categoria", c?.cor ?? "#8a8a8a", Number(t.valor));
   }
-  for (const f of fixasNaoMaterializadas) {
-    const c = f.categoria_id ? catLookup.get(f.categoria_id) : null;
-    addCat(
-      c?.id ?? null,
-      c?.nome ?? "Sem categoria",
-      c?.cor ?? "#8a8a8a",
-      valorMensalEfetivo(f),
-    );
-  }
+
   const porCategoria = Array.from(catMap.values()).sort((a, b) => b.total - a.total);
 
   const topVariaveis = [...txDespesas]

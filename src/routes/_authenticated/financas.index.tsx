@@ -74,7 +74,7 @@ function DashboardPage() {
 
   // Projeção do mês corrente (extrapola variáveis; fixas já estão na contagem)
   const projVariaveis = isCurrentMonth ? projectToEndOfMonth(data.despesas.variaveis, mes) : data.despesas.variaveis;
-  const projDespesas = data.despesas.fixas + data.despesas.provisoes + projVariaveis;
+  const projDespesas = data.despesas.fixas + data.despesas.provisoes + data.despesas.previstas + projVariaveis;
   const projSaldo = data.receitas.total - projDespesas;
 
   // Orçamentos por categoria

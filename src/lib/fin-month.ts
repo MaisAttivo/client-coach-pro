@@ -14,7 +14,7 @@ export type CategoryBreakdown = {
 
 export type MonthOverview = {
   receitas: { pt: number; manual: number; total: number };
-  despesas: { fixas: number; provisoes: number; variaveis: number; total: number };
+  despesas: { fixas: number; provisoes: number; variaveis: number; total: number; previstas: number };
   saldo: number;
   porCategoria: CategoryBreakdown[];
   topVariaveis: FinTransaction[];

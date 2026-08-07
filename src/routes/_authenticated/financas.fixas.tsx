@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { fmtEUR } from "@/lib/fin-shared";
-import { listFixed, deleteFixed, updateFixed, valorMensalEfetivo, type FinFixed } from "@/lib/fin-fixed";
+import { fmtEUR, mesRef, mesRefLabel } from "@/lib/fin-shared";
+import { MonthNavigator } from "@/components/MonthNavigator";
+import { listFixed, deleteFixed, updateFixed, valorMensalEfetivo, ativoNoMes, type FinFixed } from "@/lib/fin-fixed";
 import { listCategories } from "@/lib/fin-categories";
 import { listCredits, type FinCredit } from "@/lib/fin-credits";
 import { listTransactionsByMonth } from "@/lib/fin-transactions";
 import { FixedExpenseDialog } from "@/components/financas/FixedExpenseDialog";
+import { FixedPaymentDialog } from "@/components/financas/FixedPaymentDialog";
 import { CreditPaymentDialog } from "@/components/financas/CreditPaymentDialog";
 
 export const Route = createFileRoute("/_authenticated/financas/fixas")({
@@ -25,11 +27,8 @@ function FixasPage() {
   const [editing, setEditing] = useState<FinFixed | null>(null);
   const [showInactive, setShowInactive] = useState(false);
   const [payCredit, setPayCredit] = useState<FinCredit | null>(null);
-
-  const ym = useMemo(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  }, []);
+  const [payFixa, setPayFixa] = useState<FinFixed | null>(null);
+  const [ym, setYm] = useState(() => mesRef(new Date()));
 
   const { data: fixed = [] } = useQuery({ queryKey: ["fin_fixed"], queryFn: listFixed });
   const { data: categories = [] } = useQuery({ queryKey: ["fin_categories"], queryFn: listCategories });
@@ -41,17 +40,21 @@ function FixasPage() {
 
   const creditTxByCredit = useMemo(() => {
     const m = new Map<string, typeof monthTx[number]>();
-    for (const t of monthTx) {
-      if (t.credit_id) m.set(t.credit_id, t);
-    }
+    for (const t of monthTx) if (t.credit_id) m.set(t.credit_id, t);
+    return m;
+  }, [monthTx]);
+
+  const fixaTxByFixa = useMemo(() => {
+    const m = new Map<string, typeof monthTx[number]>();
+    for (const t of monthTx) if (t.fixed_expense_id) m.set(t.fixed_expense_id, t);
     return m;
   }, [monthTx]);
 
   const activeCredits = credits.filter((c) => c.ativo);
 
   const visible = useMemo(
-    () => fixed.filter((f) => (showInactive ? true : f.ativo)),
-    [fixed, showInactive],
+    () => fixed.filter((f) => (showInactive ? true : ativoNoMes(f, ym))),
+    [fixed, showInactive, ym],
   );
 
   const byCat = useMemo(() => {
@@ -63,21 +66,28 @@ function FixasPage() {
     return m;
   }, [visible]);
 
-  const totalFixasMensal = visible.filter((f) => f.ativo).reduce((s, f) => s + valorMensalEfetivo(f), 0);
-  const totalProvisoes = visible
-    .filter((f) => f.ativo && f.tipo_recorrencia === "anual_provisao")
-    .reduce((s, f) => s + valorMensalEfetivo(f), 0);
-  const totalCreditos = activeCredits.reduce((s, c) => {
-    const tx = creditTxByCredit.get(c.id);
-    return s + (tx ? Number(tx.valor) : Number(c.prestacao_mensal ?? 0));
-  }, 0);
-  const totalMensal = totalFixasMensal + totalCreditos;
+  const valorNoMes = (f: FinFixed) => {
+    const tx = fixaTxByFixa.get(f.id);
+    return tx ? Number(tx.valor) : valorMensalEfetivo(f);
+  };
+
+  const ativasNoMes = fixed.filter((f) => ativoNoMes(f, ym));
+  const totalPago =
+    ativasNoMes.filter((f) => fixaTxByFixa.has(f.id)).reduce((s, f) => s + valorNoMes(f), 0) +
+    activeCredits.filter((c) => creditTxByCredit.has(c.id))
+      .reduce((s, c) => s + Number(creditTxByCredit.get(c.id)!.valor), 0);
+  const totalPorPagar =
+    ativasNoMes.filter((f) => !fixaTxByFixa.has(f.id)).reduce((s, f) => s + valorMensalEfetivo(f), 0) +
+    activeCredits.filter((c) => !creditTxByCredit.has(c.id))
+      .reduce((s, c) => s + Number(c.prestacao_mensal ?? 0), 0);
+  const totalMensal = totalPago + totalPorPagar;
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["fin_fixed"] });
     qc.invalidateQueries({ queryKey: ["fin_credits"] });
     qc.invalidateQueries({ queryKey: ["fin_tx", ym] });
     qc.invalidateQueries({ queryKey: ["fin_overview"] });
+    qc.invalidateQueries({ queryKey: ["fin_history"] });
   };
 
   const handleDelete = async (id: string) => {
@@ -105,13 +115,18 @@ function FixasPage() {
 
   return (
     <main className="px-5 pt-2 pb-6 space-y-4">
+      <MonthNavigator value={ym} onChange={setYm} label={mesRefLabel(ym)} />
+
       <Card className="p-5 bg-gradient-to-br from-accent to-surface border-accent/50">
         <p className="text-[11px] uppercase tracking-widest text-accent-foreground/70 font-semibold">
-          Compromisso mensal
+          Compromisso do mês
         </p>
         <p className="font-display text-4xl text-primary mt-1 privacy-blur">{fmtEUR(totalMensal)}</p>
         <p className="text-xs text-muted-foreground mt-2 privacy-blur">
-          Fixas {fmtEUR(totalFixasMensal)} · Créditos {fmtEUR(totalCreditos)} · Provisões {fmtEUR(totalProvisoes)}
+          Pago {fmtEUR(totalPago)} · Por pagar {fmtEUR(totalPorPagar)}
+        </p>
+        <p className="text-[10px] text-muted-foreground mt-1">
+          Só o que está marcado como pago entra no saldo do mês.
         </p>
       </Card>
 
@@ -145,43 +160,62 @@ function FixasPage() {
                   {cat?.nome ?? "Sem categoria"}
                 </p>
               </div>
-              {list.map((f) => (
-                <Card
-                  key={f.id}
-                  className={`p-3 bg-surface border-border flex items-center gap-3 ${
-                    !f.ativo ? "opacity-50" : ""
-                  }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium truncate">{f.nome}</p>
-                      {f.tipo_recorrencia === "anual_provisao" && (
-                        <Badge variant="outline" className="text-[9px] py-0 h-4">anual</Badge>
-                      )}
+              {list.map((f) => {
+                const tx = fixaTxByFixa.get(f.id) ?? null;
+                const pago = !!tx;
+                const podePagar = ativoNoMes(f, ym);
+                return (
+                  <Card
+                    key={f.id}
+                    className={`p-3 bg-surface border-border flex items-center gap-3 ${
+                      !f.ativo ? "opacity-50" : ""
+                    }`}
+                  >
+                    <button
+                      onClick={() => podePagar && setPayFixa(f)}
+                      disabled={!podePagar}
+                      className={`shrink-0 w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
+                        pago ? "bg-primary border-primary text-primary-foreground" : "border-border hover:border-primary"
+                      } ${!podePagar ? "opacity-40" : ""}`}
+                      title={pago ? "Editar pagamento" : "Marcar como paga"}
+                    >
+                      {pago ? <Check className="w-3.5 h-3.5" /> : <span className="w-2 h-2 rounded-full bg-muted-foreground/40" />}
+                    </button>
+                    <button
+                      onClick={() => podePagar && setPayFixa(f)}
+                      className="flex-1 min-w-0 text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium truncate">{f.nome}</p>
+                        {f.tipo_recorrencia === "anual_provisao" && (
+                          <Badge variant="outline" className="text-[9px] py-0 h-4">anual</Badge>
+                        )}
+                        {pago && <Badge variant="outline" className="text-[9px] py-0 h-4">pago</Badge>}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {f.dia_pagamento ? `Dia ${f.dia_pagamento}` : "Sem dia"}
+                        {f.tipo_recorrencia === "anual_provisao" && f.valor_anual
+                          ? ` · ${fmtEUR(Number(f.valor_anual))}/ano`
+                          : ""}
+                      </p>
+                    </button>
+                    <span className={`font-mono text-sm shrink-0 privacy-blur ${pago ? "text-primary" : "text-muted-foreground"}`}>
+                      {fmtEUR(valorNoMes(f))}
+                    </span>
+                    <div className="flex gap-0.5 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleToggle(f)}>
+                        <Power className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(f)}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(f.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">
-                      {f.dia_pagamento ? `Dia ${f.dia_pagamento}` : "Sem dia"}
-                      {f.tipo_recorrencia === "anual_provisao" && f.valor_anual
-                        ? ` · ${fmtEUR(Number(f.valor_anual))}/ano`
-                        : ""}
-                    </p>
-                  </div>
-                  <span className="font-mono text-sm text-primary shrink-0">
-                    {fmtEUR(valorMensalEfetivo(f))}
-                  </span>
-                  <div className="flex gap-0.5 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleToggle(f)}>
-                      <Power className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(f)}>
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(f.id)}>
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           );
         })
@@ -234,6 +268,14 @@ function FixasPage() {
         onOpenChange={setOpen}
         categories={categories}
         editing={editing}
+        onSaved={invalidate}
+      />
+      <FixedPaymentDialog
+        open={!!payFixa}
+        onOpenChange={(v) => { if (!v) setPayFixa(null); }}
+        fixa={payFixa}
+        ym={ym}
+        existing={payFixa ? (fixaTxByFixa.get(payFixa.id) ?? null) : null}
         onSaved={invalidate}
       />
       <CreditPaymentDialog

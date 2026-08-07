@@ -74,7 +74,7 @@ function DashboardPage() {
 
   // Projeção do mês corrente (extrapola variáveis; fixas já estão na contagem)
   const projVariaveis = isCurrentMonth ? projectToEndOfMonth(data.despesas.variaveis, mes) : data.despesas.variaveis;
-  const projDespesas = data.despesas.fixas + data.despesas.provisoes + projVariaveis;
+  const projDespesas = data.despesas.fixas + data.despesas.provisoes + data.despesas.previstas + projVariaveis;
   const projSaldo = data.receitas.total - projDespesas;
 
   // Orçamentos por categoria
@@ -143,6 +143,12 @@ function DashboardPage() {
             <span className={`font-mono privacy-blur ${projSaldo >= 0 ? "text-primary" : "text-destructive"}`}>
               {projSaldo >= 0 ? "+" : ""}{fmtEUR(projSaldo)}
             </span>
+          </div>
+        )}
+        {data.despesas.previstas > 0 && (
+          <div className="mt-2 flex items-center justify-between text-[11px]">
+            <span className="text-muted-foreground">Fixas por pagar (não contam)</span>
+            <span className="font-mono text-muted-foreground privacy-blur">{fmtEUR(data.despesas.previstas)}</span>
           </div>
         )}
       </Card>

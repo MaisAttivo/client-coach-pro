@@ -104,7 +104,7 @@ export async function getMonthOverview(ym: string): Promise<MonthOverview> {
 
   return {
     receitas: { pt: ptReceita, manual: manualReceita, total: ptReceita + manualReceita },
-    despesas: { fixas, provisoes, variaveis, total: despesasTotal },
+    despesas: { fixas, provisoes, variaveis, total: despesasTotal, previstas },
     saldo: ptReceita + manualReceita - despesasTotal,
     porCategoria,
     topVariaveis,

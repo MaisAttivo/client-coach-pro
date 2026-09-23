@@ -624,6 +624,51 @@ export type Database = {
           },
         ]
       }
+      tasks: {
+        Row: {
+          created_at: string
+          done: boolean
+          done_at: string | null
+          due_date: string | null
+          id: string
+          notas: string | null
+          ordem: number
+          owner_id: string
+          prioridade: number
+          sistema: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          notas?: string | null
+          ordem?: number
+          owner_id: string
+          prioridade?: number
+          sistema?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          notas?: string | null
+          ordem?: number
+          owner_id?: string
+          prioridade?: number
+          sistema?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wc26_stickers: {
         Row: {
           created_at: string

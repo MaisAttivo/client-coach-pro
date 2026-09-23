@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPtRouteImport } from './routes/_authenticated/pt'
 import { Route as AuthenticatedJogosRouteImport } from './routes/_authenticated/jogos'
 import { Route as AuthenticatedImobiliarioRouteImport } from './routes/_authenticated/imobiliario'
+import { Route as AuthenticatedHubRouteImport } from './routes/_authenticated/hub'
 import { Route as AuthenticatedFinancasRouteImport } from './routes/_authenticated/financas'
 import { Route as AuthenticatedPtIndexRouteImport } from './routes/_authenticated/pt.index'
 import { Route as AuthenticatedJogosIndexRouteImport } from './routes/_authenticated/jogos.index'
@@ -65,6 +66,11 @@ const AuthenticatedImobiliarioRoute =
     path: '/imobiliario',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedHubRoute = AuthenticatedHubRouteImport.update({
+  id: '/hub',
+  path: '/hub',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedFinancasRoute = AuthenticatedFinancasRouteImport.update({
   id: '/financas',
   path: '/financas',
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/financas': typeof AuthenticatedFinancasRouteWithChildren
+  '/hub': typeof AuthenticatedHubRoute
   '/imobiliario': typeof AuthenticatedImobiliarioRouteWithChildren
   '/jogos': typeof AuthenticatedJogosRouteWithChildren
   '/pt': typeof AuthenticatedPtRouteWithChildren
@@ -200,6 +207,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/hub': typeof AuthenticatedHubRoute
   '/': typeof AuthenticatedIndexRoute
   '/financas/categorias': typeof AuthenticatedFinancasCategoriasRoute
   '/financas/creditos': typeof AuthenticatedFinancasCreditosRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/financas': typeof AuthenticatedFinancasRouteWithChildren
+  '/_authenticated/hub': typeof AuthenticatedHubRoute
   '/_authenticated/imobiliario': typeof AuthenticatedImobiliarioRouteWithChildren
   '/_authenticated/jogos': typeof AuthenticatedJogosRouteWithChildren
   '/_authenticated/pt': typeof AuthenticatedPtRouteWithChildren
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/financas'
+    | '/hub'
     | '/imobiliario'
     | '/jogos'
     | '/pt'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/hub'
     | '/'
     | '/financas/categorias'
     | '/financas/creditos'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/financas'
+    | '/_authenticated/hub'
     | '/_authenticated/imobiliario'
     | '/_authenticated/jogos'
     | '/_authenticated/pt'
@@ -374,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/imobiliario'
       fullPath: '/imobiliario'
       preLoaderRoute: typeof AuthenticatedImobiliarioRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/hub': {
+      id: '/_authenticated/hub'
+      path: '/hub'
+      fullPath: '/hub'
+      preLoaderRoute: typeof AuthenticatedHubRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/financas': {
@@ -590,6 +609,7 @@ const AuthenticatedPtRouteWithChildren = AuthenticatedPtRoute._addFileChildren(
 
 interface AuthenticatedRouteChildren {
   AuthenticatedFinancasRoute: typeof AuthenticatedFinancasRouteWithChildren
+  AuthenticatedHubRoute: typeof AuthenticatedHubRoute
   AuthenticatedImobiliarioRoute: typeof AuthenticatedImobiliarioRouteWithChildren
   AuthenticatedJogosRoute: typeof AuthenticatedJogosRouteWithChildren
   AuthenticatedPtRoute: typeof AuthenticatedPtRouteWithChildren
@@ -598,6 +618,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFinancasRoute: AuthenticatedFinancasRouteWithChildren,
+  AuthenticatedHubRoute: AuthenticatedHubRoute,
   AuthenticatedImobiliarioRoute: AuthenticatedImobiliarioRouteWithChildren,
   AuthenticatedJogosRoute: AuthenticatedJogosRouteWithChildren,
   AuthenticatedPtRoute: AuthenticatedPtRouteWithChildren,
